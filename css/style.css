@@ -251,6 +251,7 @@ main {
   flex-direction: column;
   padding: 16px 14px;
   flex-shrink: 0;
+  height: 100%;
 }
 
 .sidebar-header {
@@ -262,6 +263,32 @@ main {
   color: var(--ink);
   margin-bottom: 14px;
   padding-left: 4px;
+}
+
+.sidebar-footer {
+  margin-top: auto;         /* Locks connection container track flush to absolute base */
+  padding-top: 15px;
+  border-top: 1px dashed var(--line-strong);
+}
+
+.btn-signout {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  color: var(--red);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  text-align: center;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.btn-signout:hover {
+  background-color: var(--red);
+  color: #FFFFFF;
+  border-color: var(--red);
 }
 
 .menu-area {
@@ -1669,38 +1696,15 @@ main {
   }
 }
 
-/* ---------- Native Physical Thermal Printing Override ---------- */
-@media print {
-  body * {
-    visibility: hidden;
-  }
-  
-  #receipt, #receipt * {
-    visibility: visible;
-  }
-  
-  #receipt {
-    position: fixed;
-    inset: 0;
-    margin: 0;
-    max-width: 100%;
-    box-shadow: none;
-    border-radius: 0;
-    background: #fff;
-  }
-  
-  .rc-actions {
-    display: none !important;
-  }
-  /* ---------- Authentication Layout Screens ---------- */
+/* ---------- Global Fixed Authentication Layout Screens ---------- */
 .auth-container {
   position: fixed;
   inset: 0;
   background-color: var(--bg-main);
   display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
+  align-items: center;      /* Vertically centers the login box */
+  justify-content: center;  /* Horizontally centers the login box */
+  z-index: 99999;           /* Layers securely above all workspace elements */
   padding: 20px;
 }
 
@@ -1736,4 +1740,28 @@ main {
   color: var(--ink-muted);
   margin: 0;
 }
+
+/* ---------- Native Physical Thermal Printing Override ---------- */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  
+  #receipt, #receipt * {
+    visibility: visible;
+  }
+  
+  #receipt {
+    position: fixed;
+    inset: 0;
+    margin: 0;
+    max-width: 100%;
+    box-shadow: none;
+    border-radius: 0;
+    background: #fff;
+  }
+  
+  .rc-actions {
+    display: none !important;
+  }
 }

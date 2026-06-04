@@ -7,6 +7,9 @@
 const SUPABASE_URL = 'https://vddvsbveybvnqrfydfjr.supabase.co'; 
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkZHZzYnZleWJ2bnFyZnlkZmpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NzI1NjAsImV4cCI6MjA5NjE0ODU2MH0.TX13Ptf-Zh_RKoAb0hyczqyvhAiQkYCnhh40Ir8P9i8';
 
+// Fixed initialization placement at the top for proper script loading
+const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+
 /* ---------- Authentication State Engine ---------- */
 async function initAuth() {
   if (!supabaseClient) return;
@@ -69,8 +72,6 @@ async function handleSignOut() {
     await supabaseClient.auth.signOut();
   }
 }
-// Fixed initialization syntax for CDN script tag integration
-const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
 const DB = {
   MENU:'sabasu_menu_v1',
@@ -200,10 +201,9 @@ function renderMenu(){
   const items = menu.filter(m=>m.cat===activeCat);
   
   gridEl.innerHTML = items.map(m=>{
-    const thumb = m.img ? `<img src="${m.img}" alt="">` : `<span>🍜</span>`;
+    const thumb = m.img ? `<img src="${m.img}" alt="">` : `<span></span>`;
     const bg = m.img ? '' : `style="background:${CAT_GRAD[m.cat]||'#333'}"`;
-    // Rerouted card click action to trigger your dynamic quantity/options customization drawer
-    return `<button class="card" onclick="openCustomizeModal('${m.id}')">
+    return `<button class="card" onclick="addToCart('${m.id}')">
       <div class="thumb" ${bg}>${thumb}<span class="plus">＋</span></div>
       <div class="body">
         <div class="nm">${m.name}</div>
@@ -211,138 +211,17 @@ function renderMenu(){
         <div class="pr">${peso(m.price)}</div>
       </div>
     </button>`;
-  }).join('') || `<div class="empty"><div class="big">🍜</div>No items in this category</div>`;
-}
-
-/* ---------- Item Customization Modal Workflow ---------- */
-function openCustomizeModal(id) {
-  const m = menu.find(x => x.id === id);
-  if (!m) return;
-  
-  currentCustomizeItem = m;
-  customQty = 1;
-  document.getElementById('customQtyInput').value = customQty;
-  document.getElementById('customItemName').textContent = m.name;
-  document.getElementById('customItemPriceLabel').textContent = `Base Price: ${peso(m.price)}`;
-  
-  let optionsHtml = '';
-  if (m.cat === 'Ramen & Noodles' || m.cat === 'Pasta') {
-    optionsHtml = `
-      <div class="custom-group">
-        <div class="custom-group-title">Upgrades & Add-ons</div>
-        <label class="custom-option-row">
-          <input type="checkbox" class="custom-modifier-checkbox" data-name="Extra Portions" data-price="30" onchange="calculateCustomTotalPrice()">
-          <span>Extra Noodles/Pasta (+₱30)</span>
-        </label>
-        <label class="custom-option-row">
-          <input type="checkbox" class="custom-modifier-checkbox" data-name="Add Braised Egg" data-price="25" onchange="calculateCustomTotalPrice()">
-          <span>Add Braised Egg (+₱25)</span>
-        </label>
-      </div>
-      <div class="custom-group">
-        <div class="custom-group-title">Spiciness Level</div>
-        <div class="custom-radio-grid">
-          <label class="custom-radio-card"><input type="radio" name="spiceOpt" value="Mild Spicy" checked onchange="calculateCustomTotalPrice()"> <span>Mild</span></label>
-          <label class="custom-radio-card"><input type="radio" name="spiceOpt" value="Medium Spicy" onchange="calculateCustomTotalPrice()"> <span>Medium</span></label>
-          <label class="custom-radio-card"><input type="radio" name="spiceOpt" value="Extra Spicy" onchange="calculateCustomTotalPrice()"> <span>Hot 🔥</span></label>
-        </div>
-      </div>
-    `;
-  } else if (m.cat === 'Sides') {
-    optionsHtml = `
-      <div class="custom-group">
-        <div class="custom-group-title">Portion Size</div>
-        <div class="custom-radio-grid">
-          <label class="custom-radio-card"><input type="radio" name="sizeOpt" value="Regular Size" checked onchange="calculateCustomTotalPrice()"> <span>Regular</span></label>
-          <label class="custom-radio-card"><input type="radio" name="sizeOpt" value="Large Size" data-price="25" onchange="calculateCustomTotalPrice()"> <span>Large (+₱25)</span></label>
-        </div>
-      </div>
-      <div class="custom-group">
-        <div class="custom-group-title">Sauces / Add-ons</div>
-        <label class="custom-option-row">
-          <input type="checkbox" class="custom-modifier-checkbox" data-name="Extra Cheese" data-price="20" onchange="calculateCustomTotalPrice()">
-          <span>Extra Cheese Sauce (+₱20)</span>
-        </label>
-      </div>
-    `;
-  } else if (m.cat === 'Coffee' || m.cat === 'Beverages') {
-    optionsHtml = `
-      <div class="custom-group">
-        <div class="custom-group-title">Beverage Size</div>
-        <div class="custom-radio-grid">
-          <label class="custom-radio-card"><input type="radio" name="drinkSizeOpt" value="Regular Size" checked onchange="calculateCustomTotalPrice()"> <span>Regular</span></label>
-          <label class="custom-radio-card"><input type="radio" name="drinkSizeOpt" value="Upgraded Large" data-price="20" onchange="calculateCustomTotalPrice()"> <span>Large (+₱20)</span></label>
-        </div>
-      </div>
-      <div class="custom-group">
-        <div class="custom-group-title">Sweetness Preferences</div>
-        <div class="custom-radio-grid">
-          <label class="custom-radio-card"><input type="radio" name="sweetOpt" value="50% Sweetness" onchange="calculateCustomTotalPrice()"> <span>50% Less</span></label>
-          <label class="custom-radio-card"><input type="radio" name="sweetOpt" value="Normal Sweetness" checked onchange="calculateCustomTotalPrice()"> <span>Normal</span></label>
-        </div>
-      </div>
-    `;
-  }
-  
-  document.getElementById('customOptionsContainer').innerHTML = optionsHtml;
-  calculateCustomTotalPrice();
-  document.getElementById('customOverlay').classList.add('show');
-}
-
-function adjustCustomQty(delta) {
-  customQty += delta;
-  if (customQty < 1) customQty = 1;
-  document.getElementById('customQtyInput').value = customQty;
-  calculateCustomTotalPrice();
-}
-
-function getActiveCustomModifiers() {
-  let modifiersPrice = 0;
-  let modifierLabels = [];
-  if (!currentCustomizeItem) return { price: 0, labels: [] };
-  
-  document.querySelectorAll('.custom-modifier-checkbox:checked').forEach(cb => {
-    modifiersPrice += parseFloat(cb.dataset.price || 0);
-    modifierLabels.push(cb.dataset.name);
-  });
-  
-  document.querySelectorAll('#customOptionsContainer input[type="radio"]:checked').forEach(radio => {
-    if (radio.dataset.price) modifiersPrice += parseFloat(radio.dataset.price);
-    if (!['Standard Serve', 'Normal Sweetness', 'Regular Size', 'Mild Spicy'].includes(radio.value)) {
-      modifierLabels.push(radio.value);
-    }
-  });
-  return { price: modifiersPrice, labels: modifierLabels };
-}
-
-function calculateCustomTotalPrice() {
-  if (!currentCustomizeItem) return;
-  const mods = getActiveCustomModifiers();
-  const overallTotal = (currentCustomizeItem.price + mods.price) * customQty;
-  document.getElementById('customConfirmBtn').textContent = `Confirm Selection — ${peso(overallTotal)}`;
-}
-
-function confirmCustomAdd() {
-  if (!currentCustomizeItem) return;
-  const mods = getActiveCustomModifiers();
-  const finalUnitPrice = currentCustomizeItem.price + mods.price;
-  const descriptiveSubNote = mods.labels.length > 0 ? mods.labels.join(', ') : currentCustomizeItem.note;
-  
-  cart.push({
-    id: currentCustomizeItem.id + '_' + Date.now(), 
-    name: currentCustomizeItem.name,
-    price: finalUnitPrice,
-    qty: customQty,
-    note: descriptiveSubNote
-  });
-  
-  closeOverlay('customOverlay');
-  renderCart();
-  flash();
-  toast(`${currentCustomizeItem.name} Added ✓`);
+  }).join('') || `<div class="empty">No items in this category</div>`;
 }
 
 /* ---------- Cart ---------- */
+function addToCart(id){
+  const m = menu.find(x=>x.id===id); if(!m) return;
+  const line = cart.find(l=>l.id===id);
+  if(line) line.qty++;
+  else cart.push({id:m.id,name:m.name,price:m.price,qty:1,note:m.note});
+  renderCart(); flash();
+}
 function changeQty(id,d){
   const line=cart.find(l=>l.id===id); if(!line) return;
   line.qty+=d; if(line.qty<=0) cart=cart.filter(l=>l.id!==id);
@@ -380,15 +259,11 @@ function renderCart(){
   const box=document.getElementById('cartItems');
   if(!box) return;
   if(!cart.length){
-    box.innerHTML=`<div class="empty"><div class="big">🥢</div><div>No items yet.<br>Tap a dish to start.</div></div>`;
+    box.innerHTML=`<div class="empty">No items yet. Tap a dish to start.</div>`;
   }else{
     box.innerHTML=cart.map(l=>`
       <div class="line">
-        <div class="info">
-          <div class="ln">${l.name}</div>
-          <div class="lp">${peso(l.price)} each</div>
-          ${l.note ? `<div style="font-size:11px; color:var(--primary); font-weight:500; margin-top:2px;">↳ ${l.note}</div>` : ''}
-        </div>
+        <div class="info"><div class="ln">${l.name}</div><div class="lp">${peso(l.price)} each</div></div>
         <div class="qty">
           <button onclick="changeQty('${l.id}',-1)">−</button>
           <span>${l.qty}</span>
@@ -541,9 +416,9 @@ function confirmPayment(){
       .then(({ error }) => {
         if (error) {
           console.error("Supabase Error:", error);
-          toast("❌ Cloud Save Failed!");
+          toast("Cloud Save Failed");
         } else {
-          toast("☁️ Cloud Synced!");
+          toast("Cloud Synced");
         }
       });
   }
@@ -590,13 +465,13 @@ function showReceipt(o, isNew){
       <div class="rc-items">${itemsHtml}</div>
       <div class="rc-tot">${tot}</div>
       <div class="rc-foot">
-        <div class="ty">ありがとう · Arigatō!</div>
+        <div class="ty">Arigato</div>
         This serves as your official order receipt.<br>
         SABASU Noodle Bar · See you again soon 
       </div>
     </div>
     <div class="rc-actions">
-      <button class="rc-print" onclick="window.print()">🖨 Print</button>
+      <button class="rc-print" onclick="window.print()">Print</button>
       <button class="rc-new" onclick="closeOverlay('rcOverlay')">${isNew?'New Order':'Close'}</button>
     </div>`;
   document.getElementById('rcOverlay').classList.add('show');
@@ -615,7 +490,7 @@ function renderHistory(){
     <div class="stat"><div class="k">Total Orders</div><div class="v">${orders.length}</div></div>
     <div class="stat"><div class="k">Total Sales</div><div class="v">${peso(allSales)}</div></div>`;
   const list=document.getElementById('histList');
-  if(!orders.length){ list.innerHTML=`<div class="empty"><div class="big">📊</div>No sales yet. Completed orders will appear here.</div>`; return; }
+  if(!orders.length){ list.innerHTML=`<div class="empty">No sales yet. Completed orders will appear here.</div>`; return; }
   list.innerHTML=orders.map(o=>{
     const dt=new Date(o.ts);
     const n=o.items.reduce((s,i)=>s+i.qty,0);
@@ -656,7 +531,7 @@ function exportCSV(){
 /* ---------- Menu Manager ---------- */
 function renderManager(){
   document.getElementById('mgrGrid').innerHTML=menu.map(m=>{
-    const thumb=m.img?`<img src="${m.img}">`:`<span>🍽</span>`;
+    const thumb=m.img?`<img src="${m.img}">` : `<span></span>`;
     const bg=m.img?'':`style="background:${CAT_GRAD[m.cat]}"`;
     return `<div class="mcard">
       <div class="mthumb" ${bg}>${thumb}</div>
@@ -682,7 +557,7 @@ function openItemEdit(id){
 function updatePrev(cat){
   const p=document.getElementById('fPrev');
   if(pendingImg){ p.innerHTML=`<img src="${pendingImg}">`; document.getElementById('fRemove').style.display='block'; }
-  else { p.innerHTML='🍽'; p.style.background=CAT_GRAD[cat]||'#333'; document.getElementById('fRemove').style.display='none'; }
+  else { p.innerHTML=''; p.style.background=CAT_GRAD[cat]||'#333'; document.getElementById('fRemove').style.display='none'; }
 }
 function onImgPick(e){
   const f=e.target.files[0]; if(!f) return;
@@ -738,11 +613,8 @@ function toast(msg){
   clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2200);
 }
 document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{ if(e.target===o) o.classList.remove('show'); }));
-document.getElementById('fCat').addEventListener('change',e=>{ if(!pendingImg) updatePrev(e.target.value); });
-
-/* ---------- Init ---------- */
-initCashier();
-renderCats(); renderMenu(); renderCart(); onDiscChange();
+const fCatEl = document.getElementById('fCat');
+if (fCatEl) fCatEl.addEventListener('change',e=>{ if(!pendingImg) updatePrev(e.target.value); });
 
 /* ---------- Init ---------- */
 initCashier();

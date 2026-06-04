@@ -13,7 +13,8 @@
 </head>
 <body>
 
-  <div id="loginView" class="auth-container" style="display: none;">
+<!-- Clean Centered Login Panel Overlay -->
+<div id="loginView" class="auth-container" style="display: flex;">
   <div class="auth-card">
     <div class="auth-header">
       <h2>SABASU POS</h2>
@@ -33,20 +34,18 @@
   </div>
 </div>
 
+<!-- Main Application Shell Interface Wrapper -->
 <div id="app" style="display: none;">
   <header class="topbar">
-
-<div id="app">
-  <header class="topbar">
     <div class="brand">
-      <div class="logo">鯖</div>
+      <div class="logo">𩵋</div>
       <div>
         <h1>SABASU <span style="color:var(--red)">Noodle Bar</span></h1>
         <div class="sub">Point of Sale</div>
       </div>
     </div>
 
-    <!-- Editable cashier name -->
+    <!-- Cashier name identity configuration slot -->
     <div class="cashier">
       <span class="ic">👤</span>
       <div>
@@ -55,14 +54,11 @@
       </div>
     </div>
 
+    <!-- Clean Layout Navigation Menu Row -->
     <nav class="topnav">
       <button data-view="pos" class="active"><span class="lbl">ORDER</span></button>
       <button data-view="hist"><span class="lbl">RECORDS</span></button>
       <button data-view="mgr"><span class="lbl">ADD ITEM</span></button>
-      <button id="signOutBtn" onclick="handleSignOut()" style="color: var(--red); font-weight: 700; border-left: 1px solid var(--line-strong); padding-left: 15px; margin-left: 5px;">SIGN OUT</button>
-      <button data-view="pos" class="active"><span class="ic"></span><span class="lbl">ORDER</span></button>
-      <button data-view="hist"><span class="ic"></span><span class="lbl">RECORDS</span></button>
-      <button data-view="mgr"><span class="ic"></span><span class="lbl">ADD ITEM</span></button>
     </nav>
     <div class="clock" id="clock"></div>
   </header>
@@ -71,10 +67,15 @@
     <!-- ============ POS VIEW ============ -->
     <section class="view active" id="view-pos">
       <div class="pos">
-        <!-- Structural panel wrapping category sidebar elements -->
+        <!-- Structural left column panel wrapping category navigation selection paths -->
         <div class="sidebar-panel">
           <div class="sidebar-header">Categories</div>
           <div class="cats" id="cats"></div>
+          
+          <!-- Bottom Left Sign Out Container Anchor Placement -->
+          <div class="sidebar-footer">
+            <button id="signOutBtn" class="btn-signout" onclick="handleSignOut()">SIGN OUT</button>
+          </div>
         </div>
 
         <div class="menu-area">
@@ -266,6 +267,6 @@
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js?v=4"></script>
+<script src="js/app.js?v=5"></script>
 </body>
 </html>
