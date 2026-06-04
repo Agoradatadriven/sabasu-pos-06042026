@@ -310,3 +310,32 @@ main{flex:1;min-height:0;overflow:hidden;}
   align-items: center;
   justify-content: center;
 }
+/* Fixes the side scroll and wraps buttons cleanly */
+.pay-methods {
+  display: flex !important;
+  flex-wrap: wrap !important;  /* Prevents horizontal scrolling entirely */
+  gap: 8px !important;         /* Even spacing between all buttons */
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+/* Spaces out buttons proportionally across rows */
+.pay-methods button {
+  flex: 1 1 calc(33.33% - 8px); /* Fits 3 buttons on row one, 2 buttons on row two */
+  min-width: 85px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 6px;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+/* Uniform scaling for image icons inside buttons */
+.pay-icon {
+  width: 18px !important;
+  height: 18px !important;
+  object-fit: contain;
+  margin-right: 6px;
+  display: inline-block;
+}
