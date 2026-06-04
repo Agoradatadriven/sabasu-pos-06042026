@@ -43,10 +43,16 @@
     <!-- ============ POS VIEW ============ -->
     <section class="view active" id="view-pos">
       <div class="pos">
-        <div class="menu-area">
+        <!-- Structural panel wrapping category sidebar elements -->
+        <div class="sidebar-panel">
+          <div class="sidebar-header">Categories</div>
           <div class="cats" id="cats"></div>
+        </div>
+
+        <div class="menu-area">
           <div class="grid" id="menuGrid"></div>
         </div>
+        
         <aside class="cart" id="cart">
           <div class="cart-head">
             <h2>Current Order</h2>
@@ -111,6 +117,34 @@
   </main>
 </div>
 
+<!-- ============ ITEM CUSTOMIZATION MODAL ============ -->
+<div class="overlay" id="customOverlay">
+  <div class="modal" style="max-width: 480px;">
+    <div class="modal-head">
+      <h3 id="customItemName">Customize Item</h3>
+      <button class="x" onclick="closeOverlay('customOverlay')">×</button>
+    </div>
+    <div class="modal-body" style="padding-top: 10px;">
+      <div id="customItemPriceLabel" style="font-family:'JetBrains Mono', monospace; font-size:16px; color:var(--primary); font-weight:700; margin-bottom:15px;"></div>
+      
+      <!-- Dynamic Customization Options Panel Slot -->
+      <div id="customOptionsContainer"></div>
+      
+      <!-- Quantity Setup Panel Counter Target -->
+      <div class="fld" style="margin-top: 20px;">
+        <label>Select Quantity</label>
+        <div class="custom-qty-counter">
+          <button class="qty-btn" onclick="adjustCustomQty(-1)">−</button>
+          <input type="number" id="customQtyInput" value="1" min="1" readonly>
+          <button class="qty-btn" onclick="adjustCustomQty(1)">＋</button>
+        </div>
+      </div>
+      
+      <button class="btn btn-pay" id="customConfirmBtn" style="width:100%; margin-top:20px; padding:15px; font-size:16px;" onclick="confirmCustomAdd()">Add to Order — ₱0</button>
+    </div>
+  </div>
+</div>
+
 <!-- ============ PAYMENT MODAL ============ -->
 <div class="overlay" id="payOverlay">
   <div class="modal">
@@ -129,7 +163,7 @@
       <div class="qr-display" id="qrDisplay">
         <div class="qr-label" id="qrLabel">GCash Payment</div>
         <div class="qr-img"><img id="qrImage" src="" alt="QR Code"></div>
-        <div class="qr-text">Customer scans the QR code with their phone</div>
+        <div class="qr-text">📱 Customer scans the QR code with their phone</div>
       </div>
 
       <div class="fld">
@@ -185,10 +219,10 @@
       <div class="fld">
         <label>Photo (optional — add later)</label>
         <div class="img-pick">
-          <div class="prev" id="fPrev"></div>
+          <div class="prev" id="fPrev">🍜</div>
           <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
-            <button class="btn-ghost" onclick="document.getElementById('fImg').click()">UPLOAD PHOTO</button>
-            <button class="btn-ghost" id="fRemove" onclick="removeImg()" style="display:none">REMOVE PHOTO</button>
+            <button class="btn-ghost" onclick="document.getElementById('fImg').click()">📷 Upload Photo</button>
+            <button class="btn-ghost" id="fRemove" onclick="removeImg()" style="display:none">Remove Photo</button>
           </div>
           <input id="fImg" type="file" accept="image/*" style="display:none" onchange="onImgPick(event)">
         </div>
@@ -203,7 +237,6 @@
 
 <div class="toast" id="toast"></div>
 
-<!-- Appending a cache buster variable to prevent browser script hanging -->
-<script src="js/app.js?v=3"></script>
+<script src="js/app.js?v=4"></script>
 </body>
 </html>

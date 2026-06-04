@@ -242,13 +242,34 @@ main {
   min-height: 0;
 }
 
+/* Enclosed Left Sidebar navigation panel wrapping wrapper element */
+.sidebar-panel {
+  width: 230px;
+  background: var(--bg-panel);
+  border-right: 1px solid var(--line-strong);
+  display: flex;
+  flex-direction: column;
+  padding: 16px 14px;
+  flex-shrink: 0;
+}
+
+.sidebar-header {
+  font-family: "Shippori Mincho B1", serif;
+  font-size: 15px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--ink);
+  margin-bottom: 14px;
+  padding-left: 4px;
+}
+
 .menu-area {
   flex: 1;
   min-width: 0;
   display: flex;
-  flex-direction: row; /* Side-by-side arrangement for vertical sidebar look */
+  flex-direction: column;
   padding: 16px 18px;
-  gap: 18px;
 }
 
 /* Left-aligned Vertical Category Navigation Sidebar */
@@ -256,10 +277,9 @@ main {
   display: flex;
   flex-direction: column; 
   gap: 10px;
-  width: 210px;           /* Set sidebar column width size */
-  flex-shrink: 0;
+  flex: 1;
   overflow-y: auto;       /* Infinite downward scrolling capabilities */
-  padding-right: 6px;
+  padding-right: 2px;
   align-content: start;
 }
 
@@ -326,7 +346,7 @@ main {
   font-size: 76px;
   position: relative;
   overflow: hidden;
-  background-color: var(--bg-main);
+  background-color: var(--bg-panel);
 }
 
 .card .thumb img {
@@ -1049,6 +1069,111 @@ main {
   color: var(--primary);
 }
 
+/* Dynamic Item Customization Layout Options Control UI */
+.custom-qty-counter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-main);
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  padding: 6px;
+  width: 160px;
+  margin: 0 auto;
+}
+
+.custom-qty-counter .qty-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--bg-surface);
+  border: 1px solid var(--line-strong);
+  color: var(--ink);
+  font-weight: 700;
+  font-size: 18px;
+  display: grid;
+  place-items: center;
+}
+
+.custom-qty-counter input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  text-align: center;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  width: 100%;
+}
+
+.custom-group {
+  border-top: 1px solid var(--line);
+  margin-top: 15px;
+  padding-top: 12px;
+}
+
+.custom-group-title {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  color: var(--ink-muted);
+  margin-bottom: 8px;
+}
+
+.custom-option-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.custom-option-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.custom-radio-grid {
+  display: flex;
+  gap: 8px;
+}
+
+.custom-radio-card {
+  flex: 1;
+  border: 1px solid var(--line-strong);
+  background: var(--bg-main);
+  border-radius: 10px;
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: 0.15s;
+}
+
+.custom-radio-card input[type="radio"] {
+  accent-color: var(--primary);
+  margin: 0;
+}
+
+.custom-radio-card:has(input:checked) {
+  border-color: var(--primary);
+  background: var(--bg-surface);
+  color: var(--primary);
+}
+
 .pay-summary {
   background: var(--bg-main);
   border: 1px solid var(--line-strong);
@@ -1426,8 +1551,18 @@ main {
     flex-direction: column;
   }
 
+  .sidebar-panel {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--line-strong);
+    padding: 12px 14px;
+  }
+
+  .sidebar-header {
+    display: none; /* Hide header text layout on mobile view */
+  }
+
   .menu-area {
-    flex-direction: column; /* Reverts sidebar track into vertical stack layout on small mobile screen boundaries */
     padding-bottom: 84px;
   }
   

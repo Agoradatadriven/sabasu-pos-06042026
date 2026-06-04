@@ -12,11 +12,11 @@ const DB = {
 };
 
 const CAT_EMOJI = {
-  'Ramen & Noodles': '',
-  'Pasta': '',
-  'Sides': '',
-  'Coffee': '',
-  'Beverages': ''
+  'Ramen & Noodles':'🍜',
+  'Pasta':'🍝',
+  'Sides':'🍟',
+  'Coffee':'☕',
+  'Beverages':'🥤'
 };
 
 const CAT_GRAD = {
@@ -58,6 +58,11 @@ let orderType = 'Dine In';
 let payMethod = 'Cash';
 let editingId = null;
 let pendingImg = null;
+
+// Global state variables tracking active item customization parameters
+let currentCustomizeItem = null;
+let customQty = 1;
+
 const peso = n => '₱'+Number(n).toLocaleString('en-PH',{minimumFractionDigits:0,maximumFractionDigits:2});
 
 /* ---------- Cashier name (editable + persistent) ---------- */
@@ -67,8 +72,10 @@ function getCashier(){
 }
 function initCashier(){
   const inp = document.getElementById('cashierName');
-  inp.value = DB.get(DB.CASHIER, '') || '';
-  inp.addEventListener('input', e=>{ DB.set(DB.CASHIER, e.target.value); });
+  if(inp) {
+    inp.value = DB.get(DB.CASHIER, '') || '';
+    inp.addEventListener('input', e=>{ DB.set(DB.CASHIER, e.target.value); });
+  }
 }
 
 /* ---------- Navigation ---------- */
@@ -85,11 +92,13 @@ document.querySelectorAll('.topnav button').forEach(b=>{
 
 /* ---------- Aesthetic Digital Clock ---------- */
 function tick() {
+    const clockEl = document.getElementById('clock');
+    if (!clockEl) return;
     const d = new Date();
     const dateStr = d.toLocaleDateString('en-PH', { weekday: 'short', month: 'short', day: 'numeric' });
     const timeStr = d.toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
 
-    document.getElementById('clock').innerHTML = `
+    clockEl.innerHTML = `
         <div class="clock-time">${timeStr}</div>
         <div class="clock-date">${dateStr}</div>
     `;
@@ -101,20 +110,28 @@ tick();
 function currentOrderNo(){ return DB.get(DB.COUNTER,0)+1; }
 function fmtNo(n){ return '#'+String(n).padStart(3,'0'); }
 
-/* ---------- Render menu grid ---------- */
+/* ---------- Render left sidebar menu panel cats ---------- */
 function renderCats(){
-  const cats=['All',...Object.keys(CAT_EMOJI)];
-  document.getElementById('cats').innerHTML = cats.map(c=>
-    `<button class="cat ${c===activeCat?'active':''}" onclick="setCat('${c.replace(/'/g,"\\'")}')">${c==='All'?'⭐ All':CAT_EMOJI[c]+' '+c}</button>`
-  ).join('');
+  const cats = ['All', ...Object.keys(CAT_EMOJI)];
+  const catsBox = document.getElementById('cats');
+  if (!catsBox) return;
+  
+  catsBox.innerHTML = cats.map(c => {
+    const displayLabel = c === 'All' ? '⭐ All' : c;
+    return `<button class="cat ${c===activeCat?'active':''}" onclick="setCat('${c.replace(/'/g,"\'")}')">${displayLabel}</button>`;
+  }).join('');
 }
 function setCat(c){ activeCat=c; renderCats(); renderMenu(); }
+
 function renderMenu(){
+  const gridEl = document.getElementById('menuGrid');
+  if (!gridEl) return;
   const items = menu.filter(m=>activeCat==='All'||m.cat===activeCat);
-  document.getElementById('menuGrid').innerHTML = items.map(m=>{
+  
+  gridEl.innerHTML = items.map(m=>{
     const thumb = m.img ? `<img src="${m.img}" alt="">` : `<span>${CAT_EMOJI[m.cat]||'🍽'}</span>`;
     const bg = m.img ? '' : `style="background:${CAT_GRAD[m.cat]||'#333'}"`;
-    return `<button class="card" onclick="addToCart('${m.id}')">
+    return `<button class="card" onclick="openCustomizeModal('${m.id}')">
       <div class="thumb" ${bg}>${thumb}<span class="plus">＋</span></div>
       <div class="body">
         <div class="nm">${m.name}</div>
@@ -125,14 +142,164 @@ function renderMenu(){
   }).join('') || `<div class="empty"><div class="big">🍜</div>No items in this category</div>`;
 }
 
-/* ---------- Cart ---------- */
-function addToCart(id){
-  const m = menu.find(x=>x.id===id); if(!m) return;
-  const line = cart.find(l=>l.id===id);
-  if(line) line.qty++;
-  else cart.push({id:m.id,name:m.name,price:m.price,qty:1,note:m.note});
-  renderCart(); flash();
+/* ---------- Item Customization Modal Workflow ---------- */
+function openCustomizeModal(id) {
+  const m = menu.find(x => x.id === id);
+  if (!m) return;
+  
+  currentCustomizeItem = m;
+  customQty = 1;
+  document.getElementById('customQtyInput').value = customQty;
+  document.getElementById('customItemName').textContent = m.name;
+  document.getElementById('customItemPriceLabel').textContent = `Base Price: ${peso(m.price)}`;
+  
+  // Render customization choices contextually based on product category
+  let optionsHtml = '';
+  if (m.cat === 'Ramen & Noodles' || m.cat === 'Pasta') {
+    optionsHtml = `
+      <div class="custom-group">
+        <div class="custom-group-title">Upgrades & Add-ons</div>
+        <label class="custom-option-row">
+          <input type="checkbox" class="custom-modifier-checkbox" data-name="Extra Portions" data-price="30" onchange="calculateCustomTotalPrice()">
+          <span>Extra Noodles/Pasta (+₱30)</span>
+        </label>
+        <label class="custom-option-row">
+          <input type="checkbox" class="custom-modifier-checkbox" data-name="Add Braised Egg" data-price="25" onchange="calculateCustomTotalPrice()">
+          <span>Add Braised Egg (+₱25)</span>
+        </label>
+      </div>
+      <div class="custom-group">
+        <div class="custom-group-title">Spiciness Level</div>
+        <div class="custom-radio-grid">
+          <label class="custom-radio-card"><input type="radio" name="spiceOpt" value="Mild Spicy" checked onchange="calculateCustomTotalPrice()"> <span>Mild</span></label>
+          <label class="custom-radio-card"><input type="radio" name="spiceOpt" value="Medium Spicy" onchange="calculateCustomTotalPrice()"> <span>Medium</span></label>
+          <label class="custom-radio-card"><input type="radio" name="spiceOpt" value="Extra Spicy" onchange="calculateCustomTotalPrice()"> <span>Hot 🔥</span></label>
+        </div>
+      </div>
+    `;
+  } else if (m.cat === 'Sides') {
+    optionsHtml = `
+      <div class="custom-group">
+        <div class="custom-group-title">Portion Size</div>
+        <div class="custom-radio-grid">
+          <label class="custom-radio-card"><input type="radio" name="sizeOpt" value="Regular Size" checked onchange="calculateCustomTotalPrice()"> <span>Regular</span></label>
+          <label class="custom-radio-card"><input type="radio" name="sizeOpt" value="Large Size" data-price="25" onchange="calculateCustomTotalPrice()"> <span>Large (+₱25)</span></label>
+        </div>
+      </div>
+      <div class="custom-group">
+        <div class="custom-group-title">Sauces / Add-ons</div>
+        <label class="custom-option-row">
+          <input type="checkbox" class="custom-modifier-checkbox" data-name="Extra Cheese Sauce" data-price="20" onchange="calculateCustomTotalPrice()">
+          <span>Extra Cheese Sauce (+₱20)</span>
+        </label>
+        <label class="custom-option-row">
+          <input type="checkbox" class="custom-modifier-checkbox" data-name="Add Chili Flakes" data-price="0" onchange="calculateCustomTotalPrice()">
+          <span>Add Chili Flakes (Free)</span>
+        </label>
+      </div>
+    `;
+  } else if (m.cat === 'Coffee' || m.cat === 'Beverages') {
+    optionsHtml = `
+      <div class="custom-group">
+        <div class="custom-group-title">Beverage Size</div>
+        <div class="custom-radio-grid">
+          <label class="custom-radio-card"><input type="radio" name="drinkSizeOpt" value="Regular Size" checked onchange="calculateCustomTotalPrice()"> <span>Regular</span></label>
+          <label class="custom-radio-card"><input type="radio" name="drinkSizeOpt" value="Upgraded Large" data-price="20" onchange="calculateCustomTotalPrice()"> <span>Large (+₱20)</span></label>
+        </div>
+      </div>
+      <div class="custom-group">
+        <div class="custom-group-title">Sweetness Preferences</div>
+        <div class="custom-radio-grid">
+          <label class="custom-radio-card"><input type="radio" name="sweetOpt" value="50% Sweetness" onchange="calculateCustomTotalPrice()"> <span>50% Less</span></label>
+          <label class="custom-radio-card"><input type="radio" name="sweetOpt" value="Normal Sweetness" checked onchange="calculateCustomTotalPrice()"> <span>Normal</span></label>
+          <label class="custom-radio-card"><input type="radio" name="sweetOpt" value="120% Sweetness" onchange="calculateCustomTotalPrice()"> <span>Extra</span></label>
+        </div>
+      </div>
+    `;
+  } else {
+    // Fallback standard option parameters
+    optionsHtml = `
+      <div class="custom-group">
+        <div class="custom-group-title">Preparation Preference</div>
+        <div class="custom-radio-grid">
+          <label class="custom-radio-card"><input type="radio" name="stdOpt" value="Standard Serve" checked onchange="calculateCustomTotalPrice()"> <span>Standard Serve</span></label>
+        </div>
+      </div>
+    `;
+  }
+  
+  document.getElementById('customOptionsContainer').innerHTML = optionsHtml;
+  calculateCustomTotalPrice();
+  document.getElementById('customOverlay').classList.add('show');
 }
+
+function adjustCustomQty(delta) {
+  customQty += delta;
+  if (customQty < 1) customQty = 1;
+  document.getElementById('customQtyInput').value = customQty;
+  calculateCustomTotalPrice();
+}
+
+function getActiveCustomModifiers() {
+  let modifiersPrice = 0;
+  let modifierLabels = [];
+  
+  if (!currentCustomizeItem) return { price: 0, labels: [] };
+  
+  // Accumulate from checkboxed modifiers
+  document.querySelectorAll('.custom-modifier-checkbox:checked').forEach(cb => {
+    modifiersPrice += parseFloat(cb.dataset.price || 0);
+    modifierLabels.push(cb.dataset.name);
+  });
+  
+  // Accumulate selected radio preferences strings
+  const selectedRadio = document.querySelectorAll('#customOptionsContainer input[type="radio"]:checked');
+  selectedRadio.forEach(radio => {
+    if (radio.dataset.price) {
+      modifiersPrice += parseFloat(radio.dataset.price);
+    }
+    // Only capture explicitly named unique descriptive values
+    if (radio.value !== 'Standard Serve' && radio.value !== 'Normal Sweetness' && radio.value !== 'Regular Size' && radio.value !== 'Mild Spicy') {
+      modifierLabels.push(radio.value);
+    }
+  });
+  
+  return { price: modifiersPrice, labels: modifierLabels };
+}
+
+function calculateCustomTotalPrice() {
+  if (!currentCustomizeItem) return;
+  const mods = getActiveCustomModifiers();
+  const singleItemTotal = currentCustomizeItem.price + mods.price;
+  const overallTotal = singleItemTotal * customQty;
+  
+  document.getElementById('customConfirmBtn').textContent = `Add to Order — ${peso(overallTotal)}`;
+}
+
+function confirmCustomAdd() {
+  if (!currentCustomizeItem) return;
+  
+  const mods = getActiveCustomModifiers();
+  const finalUnitPrice = currentCustomizeItem.price + mods.price;
+  const descriptiveSubNote = mods.labels.length > 0 ? mods.labels.join(', ') : currentCustomizeItem.note;
+  
+  // Push custom configured structure configuration to basket list
+  // Modifications sit as distinct dynamic items inside array matrix to protect tailored kitchen requests
+  cart.push({
+    id: currentCustomizeItem.id + '_' + Date.now(), // Generate distinct runtime identifiers
+    name: currentCustomizeItem.name,
+    price: finalUnitPrice,
+    qty: customQty,
+    note: descriptiveSubNote
+  });
+  
+  closeOverlay('customOverlay');
+  renderCart();
+  flash();
+  toast(`${currentCustomizeItem.name} added ✓`);
+}
+
+/* ---------- Cart Workspace Controls ---------- */
 function changeQty(id,d){
   const line=cart.find(l=>l.id===id); if(!line) return;
   line.qty+=d; if(line.qty<=0) cart=cart.filter(l=>l.id!==id);
@@ -159,19 +326,26 @@ function calc(){
 function onDiscChange(){
   const dt=document.getElementById('discType').value;
   const inp=document.getElementById('discVal');
-  inp.style.display=(dt==='pct'||dt==='amt')?'block':'none';
-  if(dt!=='pct'&&dt!=='amt') inp.value='';
-  inp.placeholder = dt==='pct'?'%':'₱';
+  if (inp) {
+    inp.style.display=(dt==='pct'||dt==='amt')?'block':'none';
+    if(dt!=='pct'&&dt!=='amt') inp.value='';
+    inp.placeholder = dt==='pct'?'%':'₱';
+  }
   renderTotals();
 }
 function renderCart(){
   const box=document.getElementById('cartItems');
+  if(!box) return;
   if(!cart.length){
     box.innerHTML=`<div class="empty"><div class="big">🥢</div><div>No items yet.<br>Tap a dish to start.</div></div>`;
   }else{
     box.innerHTML=cart.map(l=>`
       <div class="line">
-        <div class="info"><div class="ln">${l.name}</div><div class="lp">${peso(l.price)} each</div></div>
+        <div class="info">
+          <div class="ln">${l.name}</div>
+          <div class="lp">${peso(l.price)} each</div>
+          ${l.note ? `<div class="cart-item-modifiers-label" style="font-size:11px; color:var(--primary); font-weight:500; margin-top:2px;">↳ ${l.note}</div>` : ''}
+        </div>
         <div class="qty">
           <button onclick="changeQty('${l.id}',-1)">−</button>
           <span>${l.qty}</span>
@@ -188,13 +362,21 @@ function renderTotals(){
   let html=`<div class="t"><span>Subtotal (${cart.reduce((s,l)=>s+l.qty,0)} items)</span><span>${peso(subtotal)}</span></div>`;
   if(discount>0) html+=`<div class="t disc"><span>${label}</span><span>−${peso(discount)}</span></div>`;
   html+=`<div class="grand"><span class="lbl">TOTAL</span><span class="amt">${peso(total)}</span></div>`;
-  document.getElementById('totals').innerHTML=html;
+  
+  const totalsBox = document.getElementById('totals');
+  if (totalsBox) totalsBox.innerHTML=html;
+  
   const btn=document.getElementById('payBtn');
-  btn.disabled=!cart.length;
-  btn.textContent='Charge '+peso(total);
+  if (btn) {
+    btn.disabled=!cart.length;
+    btn.textContent='Charge '+peso(total);
+  }
+  
   const mb=document.getElementById('mobBadge');
-  if(mb){ mb.textContent=cart.reduce((s,l)=>s+l.qty,0)+' · '+peso(total);
-    document.getElementById('mobCartBtn').style.display=cart.length?'flex':'none'; }
+  if(mb){ 
+    mb.textContent=cart.reduce((s,l)=>s+l.qty,0)+' · '+peso(total);
+    document.getElementById('mobCartBtn').style.display=cart.length?'flex':'none'; 
+  }
 }
 function flash(){
   const mb=document.getElementById('mobCartBtn');
@@ -203,13 +385,12 @@ function flash(){
 function openCart(){ document.getElementById('cart').classList.add('open'); }
 function closeCart(){ document.getElementById('cart').classList.remove('open'); }
 
-/* ---------- Payment ---------- */
+/* ---------- Payment Mode Workflow ---------- */
 function setPayMethod(m){
   payMethod=m;
   document.querySelectorAll('#payMethods button').forEach(b=>b.classList.toggle('active',b.dataset.m===m));
   
-  // Clean, consolidated system mapping matching database keys exactly
- const qrMethods = {
+  const qrMethods = {
     'Gcash': 'Qr/qr-gcash.png',
     'Maya': 'Qr/qr-maya.png',
     'qrph': 'Qr/qr-qrph.png',
@@ -225,7 +406,7 @@ function setPayMethod(m){
     document.getElementById('cashFld').style.display = 'none';
     document.getElementById('quickCash').style.display = 'none';
   }else{
-    qrDisplay.classList.remove('show');
+    if (qrDisplay) qrDisplay.classList.remove('show');
     document.getElementById('cashFld').style.display = 'block';
     document.getElementById('quickCash').style.display = 'flex';
   }
@@ -246,7 +427,8 @@ function openPay(){
 function setCash(v){ document.getElementById('cashInput').value=v; renderPay(); }
 function syncCashier(val){
   DB.set(DB.CASHIER, val);
-  document.getElementById('cashierName').value = val;
+  const cn = document.getElementById('cashierName');
+  if (cn) cn.value = val;
 }
 function renderPay(){
   const {subtotal,discount,label,total}=calc();
@@ -396,7 +578,8 @@ function exportCSV(){
     rows.push([fmtNo(o.no),dt.toLocaleDateString('en-PH'),dt.toLocaleTimeString('en-PH'),o.cashier||'',o.type,o.method,
       o.items.map(i=>i.qty+'x '+i.name).join('; '),o.subtotal,o.discount,o.total,o.cash,o.change]);
   });
-  const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('
+');
   const blob=new Blob([csv],{type:'text/csv'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
@@ -485,11 +668,12 @@ function resetMenu(){
 function closeOverlay(id){ document.getElementById(id).classList.remove('show'); }
 let toastT;
 function toast(msg){
-  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  const t=document.getElementById('toast'); if(!t) return; t.textContent=msg; t.classList.add('show');
   clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2200);
 }
 document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{ if(e.target===o) o.classList.remove('show'); }));
-document.getElementById('fCat').addEventListener('change',e=>{ if(!pendingImg) updatePrev(e.target.value); });
+const fCatEl = document.getElementById('fCat');
+if (fCatEl) fCatEl.addEventListener('change',e=>{ if(!pendingImg) updatePrev(e.target.value); });
 
 /* ---------- Init ---------- */
 initCashier();
