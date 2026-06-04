@@ -193,24 +193,26 @@ function closeCart(){ document.getElementById('cart').classList.remove('open'); 
 /* ---------- Payment ---------- */
 // Variable to store the currently selected payment method
 function setPayMethod(method) {
-    // 1. Global state tracking (Ensures your receipt records the correct method)
+    // 1. Sync global state tracking for receipts
     if (typeof currentPayMethod !== 'undefined') {
         currentPayMethod = method;
     }
 
-    // 2. Highlight the active button layout
-    document.querySelectorAll('.pay-methods button').forEach(btn => btn.classList.remove('active'));
+    // 2. Toggle active style modifier on navigation buttons
+    document.querySelectorAll('.pay-methods button').forEach(btn => {
+        btn.classList.remove('active');
+    });
     const activeBtn = document.querySelector(`.pay-methods button[data-m="${method}"]`);
     if (activeBtn) activeBtn.classList.add('active');
 
-    // 3. Grab UI elements
+    // 3. Cache DOM UI elements
     const qrContainer = document.getElementById('qrContainer');
     const qrImage = document.getElementById('qrImage');
     const qrLabel = document.getElementById('qrLabel');
     const cashFld = document.getElementById('cashFld');
     const quickCash = document.getElementById('quickCash');
 
-    // Dictionary to clean up UI display labels neatly
+    // Dictionary maps raw identifiers to clean presentation titles
     const paymentNames = {
         'Gcash': 'GCash',
         'Maya': 'Maya',
@@ -218,29 +220,31 @@ function setPayMethod(method) {
         'visa': 'Visa'
     };
 
-    // 4. Interface control switch
+    // 4. View state control logic switch
     if (paymentNames[method]) {
-        // Digital Payment: Show QR block, hide cash tools
+        // Digital Route: Render QR workspace and hide cash modifiers
         if (qrContainer) qrContainer.style.display = 'block';
         if (cashFld) cashFld.style.display = 'none';
         if (quickCash) quickCash.style.display = 'none';
 
-        // Update display text values and source path dynamically
+        // Bind dynamic textual headers and target image assets
         if (qrLabel) qrLabel.innerText = `Scan to Pay via ${paymentNames[method]}`;
-        if (qrImage) qrImage.src = `qr-${method.toLowerCase()}.png`;
+        if (qrImage) qrImage.src = `PNG/qr-${method.toLowerCase()}.png`;
 
     } else {
-        // Cash Payment: Hide QR code view and restore standard numerical keyboard inputs
+        // Fiat Route: Terminate QR viewport and display standard currency layouts
         if (qrContainer) qrContainer.style.display = 'none';
         if (cashFld) cashFld.style.display = 'block';
         if (quickCash) quickCash.style.display = 'flex';
         
-        // Optional Quality-of-Life: Clear old cash inputs when changing methods
+        // Auto-focus text field for rapid numeric keypad typing
         const cashInput = document.getElementById('cashInput');
-        if (cashInput && method === 'Cash') cashInput.focus();
+        if (cashInput && method === 'Cash') {
+            cashInput.focus();
+        }
     }
 
-    // 5. Run calculations / safety checks
+    // 5. Fire core transactional ledger recalculations
     if (typeof renderPay === 'function') {
         renderPay();
     }

@@ -114,16 +114,30 @@
 <!-- ============ PAYMENT MODAL ============ -->
 <div class="overlay" id="payOverlay">
   <div class="modal">
-    <div class="modal-head"><h3>Payment</h3><button class="x" onclick="closeOverlay('payOverlay')">×</button></div>
+    <div class="modal-head">
+      <h3>Payment</h3>
+      <button class="x" onclick="closeOverlay('payOverlay')">×</button>
+    </div>
+    
     <div class="modal-body">
       <div class="pay-summary" id="paySummary"></div>
       
       <div class="pay-methods" id="payMethods">
-        <button class="active" data-m="Cash" onclick="setPayMethod('Cash')"> 💵 Cash </button>
-        <button data-m="Gcash" onclick="setPayMethod('Gcash')"> <img src="qr-gcash.png" alt="GCash" class="pay-icon"> GCash </button>
-        <button data-m="Maya" onclick="setPayMethod('Maya')"> <img src="qr-maya.png" alt="Maya" class="pay-icon"> Maya </button>
-        <button data-m="qrph" onclick="setPayMethod('qrph')"> <img src="qr-qrph.png" alt="QRph" class="pay-icon"> QRph </button>
-        <button data-m="visa" onclick="setPayMethod('visa')"> <img src="qr-visa.png" alt="Visa" class="pay-icon"> Visa </button>
+        <button class="active" data-m="Cash" onclick="setPayMethod('Cash')">
+          💵 Cash
+        </button>
+        <button data-m="Gcash" onclick="setPayMethod('Gcash')">
+          <img src="Icon/icon-gcash.png" alt="GCash" class="pay-icon"> GCash
+        </button>
+        <button data-m="Maya" onclick="setPayMethod('Maya')">
+          <img src="Icon/icon-maya.jpg" alt="Maya" class="pay-icon"> Maya
+        </button>
+        <button data-m="qrph" onclick="setPayMethod('qrph')">
+          <img src="Icon/icon-qrph.png" alt="QRph" class="pay-icon"> QRph
+        </button>
+        <button data-m="visa" onclick="setPayMethod('visa')">
+          <img src="Icon/icon-visa.png" alt="Visa" class="pay-icon"> Visa
+        </button>
       </div>
 
       <div id="qrContainer" style="display: none; text-align: center; margin: 15px 0; padding: 12px; border: 2px dashed #4a3f6b; border-radius: 8px; background: #1f1a2e;">
@@ -142,7 +156,8 @@
       </div>
       
       <div class="quick-cash" id="quickCash"></div>
-      <button class="btn btn-pay" id="confirmPay" style="width:100%" onclick="confirmPayment()">Complete Sale</button>
+      
+      <button class="btn btn-pay" id="confirmPay" style="width: 100%;" onclick="confirmPayment()">Complete Sale</button>
     </div>
   </div>
 </div>
