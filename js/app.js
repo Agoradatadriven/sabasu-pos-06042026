@@ -1,14 +1,16 @@
 /* ============================================================
    SABASU NOODLE BAR — POS  |  app.js
-   Data layer = localStorage ("database")
+   Data layer = localStorage ("database") + Live Supabase Cloud
    ============================================================ */
 
-   // 1. Initialize your Supabase Cloud Client Connection Bridge
-const SUPABASE_URL = 'https://vddvsbveybvnqrfydfjr.supabase.co/rest/v1/';
+// 1. Initialize your Supabase Cloud Client Connection Bridge via the global window container
+const SUPABASE_URL = 'https://vddvsbveybvnqrfydfjr.supabase.co'; 
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkZHZzYnZleWJ2bnFyZnlkZmpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NzI1NjAsImV4cCI6MjA5NjE0ODU2MH0.TX13Ptf-Zh_RKoAb0hyczqyvhAiQkYCnhh40Ir8P9i8';
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-const DB = {
 
+// Fixed initialization syntax for CDN script tag integration
+const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+
+const DB = {
   MENU:'sabasu_menu_v1',
   ORDERS:'sabasu_orders_v1',
   COUNTER:'sabasu_counter_v1',
@@ -59,11 +61,17 @@ let menu = DB.get(DB.MENU, null);
 if(!menu){ menu = DEFAULT_MENU.map(x=>({...x})); DB.set(DB.MENU, menu); }
 
 let cart = [];
-let activeCat = 'All';
+// Automatically boot system straight into your first real menu category
+let activeCat = 'Ramen & Noodles';
 let orderType = 'Dine In';
 let payMethod = 'Cash';
 let editingId = null;
 let pendingImg = null;
+
+// Global workspace variables tracking interactive item configurations
+let currentCustomizeItem = null;
+let customQty = 1;
+
 const peso = n => '₱'+Number(n).toLocaleString('en-PH',{minimumFractionDigits:0,maximumFractionDigits:2});
 
 /* ---------- Cashier name (editable + persistent) ---------- */
@@ -73,8 +81,10 @@ function getCashier(){
 }
 function initCashier(){
   const inp = document.getElementById('cashierName');
-  inp.value = DB.get(DB.CASHIER, '') || '';
-  inp.addEventListener('input', e=>{ DB.set(DB.CASHIER, e.target.value); });
+  if(inp) {
+    inp.value = DB.get(DB.CASHIER, '') || '';
+    inp.addEventListener('input', e=>{ DB.set(DB.CASHIER, e.target.value); });
+  }
 }
 
 /* ---------- Navigation ---------- */
@@ -95,10 +105,13 @@ function tick() {
     const dateStr = d.toLocaleDateString('en-PH', { weekday: 'short', month: 'short', day: 'numeric' });
     const timeStr = d.toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
 
-    document.getElementById('clock').innerHTML = `
-        <div class="clock-time">${timeStr}</div>
-        <div class="clock-date">${dateStr}</div>
-    `;
+    const clockEl = document.getElementById('clock');
+    if(clockEl) {
+      clockEl.innerHTML = `
+          <div class="clock-time">${timeStr}</div>
+          <div class="clock-date">${dateStr}</div>
+      `;
+    }
 }
 setInterval(tick, 1000); 
 tick();
@@ -107,20 +120,28 @@ tick();
 function currentOrderNo(){ return DB.get(DB.COUNTER,0)+1; }
 function fmtNo(n){ return '#'+String(n).padStart(3,'0'); }
 
-/* ---------- Render menu grid ---------- */
+/* ---------- Render Left Sidebar Categories Panel (No Emojis / No All Button) ---------- */
 function renderCats(){
-  const cats=['All',...Object.keys(CAT_EMOJI)];
-  document.getElementById('cats').innerHTML = cats.map(c=>
-    `<button class="cat ${c===activeCat?'active':''}" onclick="setCat('${c.replace(/'/g,"\\'")}')">${c==='All'?'⭐ All':CAT_EMOJI[c]+' '+c}</button>`
+  const cats = Object.keys(CAT_EMOJI);
+  const catsBox = document.getElementById('cats');
+  if(!catsBox) return;
+
+  catsBox.innerHTML = cats.map(c=>
+    `<button class="cat ${c===activeCat?'active':''}" onclick="setCat('${c.replace(/'/g,"\\'")}')">${c}</button>`
   ).join('');
 }
 function setCat(c){ activeCat=c; renderCats(); renderMenu(); }
+
 function renderMenu(){
-  const items = menu.filter(m=>activeCat==='All'||m.cat===activeCat);
-  document.getElementById('menuGrid').innerHTML = items.map(m=>{
-    const thumb = m.img ? `<img src="${m.img}" alt="">` : `<span>${CAT_EMOJI[m.cat]||'🍽'}</span>`;
+  const gridEl = document.getElementById('menuGrid');
+  if(!gridEl) return;
+  const items = menu.filter(m=>m.cat===activeCat);
+  
+  gridEl.innerHTML = items.map(m=>{
+    const thumb = m.img ? `<img src="${m.img}" alt="">` : `<span>🍜</span>`;
     const bg = m.img ? '' : `style="background:${CAT_GRAD[m.cat]||'#333'}"`;
-    return `<button class="card" onclick="addToCart('${m.id}')">
+    // Rerouted card click action to trigger your dynamic quantity/options customization drawer
+    return `<button class="card" onclick="openCustomizeModal('${m.id}')">
       <div class="thumb" ${bg}>${thumb}<span class="plus">＋</span></div>
       <div class="body">
         <div class="nm">${m.name}</div>
@@ -131,14 +152,135 @@ function renderMenu(){
   }).join('') || `<div class="empty"><div class="big">🍜</div>No items in this category</div>`;
 }
 
-/* ---------- Cart ---------- */
-function addToCart(id){
-  const m = menu.find(x=>x.id===id); if(!m) return;
-  const line = cart.find(l=>l.id===id);
-  if(line) line.qty++;
-  else cart.push({id:m.id,name:m.name,price:m.price,qty:1,note:m.note});
-  renderCart(); flash();
+/* ---------- Item Customization Modal Workflow ---------- */
+function openCustomizeModal(id) {
+  const m = menu.find(x => x.id === id);
+  if (!m) return;
+  
+  currentCustomizeItem = m;
+  customQty = 1;
+  document.getElementById('customQtyInput').value = customQty;
+  document.getElementById('customItemName').textContent = m.name;
+  document.getElementById('customItemPriceLabel').textContent = `Base Price: ${peso(m.price)}`;
+  
+  let optionsHtml = '';
+  if (m.cat === 'Ramen & Noodles' || m.cat === 'Pasta') {
+    optionsHtml = `
+      <div class="custom-group">
+        <div class="custom-group-title">Upgrades & Add-ons</div>
+        <label class="custom-option-row">
+          <input type="checkbox" class="custom-modifier-checkbox" data-name="Extra Portions" data-price="30" onchange="calculateCustomTotalPrice()">
+          <span>Extra Noodles/Pasta (+₱30)</span>
+        </label>
+        <label class="custom-option-row">
+          <input type="checkbox" class="custom-modifier-checkbox" data-name="Add Braised Egg" data-price="25" onchange="calculateCustomTotalPrice()">
+          <span>Add Braised Egg (+₱25)</span>
+        </label>
+      </div>
+      <div class="custom-group">
+        <div class="custom-group-title">Spiciness Level</div>
+        <div class="custom-radio-grid">
+          <label class="custom-radio-card"><input type="radio" name="spiceOpt" value="Mild Spicy" checked onchange="calculateCustomTotalPrice()"> <span>Mild</span></label>
+          <label class="custom-radio-card"><input type="radio" name="spiceOpt" value="Medium Spicy" onchange="calculateCustomTotalPrice()"> <span>Medium</span></label>
+          <label class="custom-radio-card"><input type="radio" name="spiceOpt" value="Extra Spicy" onchange="calculateCustomTotalPrice()"> <span>Hot 🔥</span></label>
+        </div>
+      </div>
+    `;
+  } else if (m.cat === 'Sides') {
+    optionsHtml = `
+      <div class="custom-group">
+        <div class="custom-group-title">Portion Size</div>
+        <div class="custom-radio-grid">
+          <label class="custom-radio-card"><input type="radio" name="sizeOpt" value="Regular Size" checked onchange="calculateCustomTotalPrice()"> <span>Regular</span></label>
+          <label class="custom-radio-card"><input type="radio" name="sizeOpt" value="Large Size" data-price="25" onchange="calculateCustomTotalPrice()"> <span>Large (+₱25)</span></label>
+        </div>
+      </div>
+      <div class="custom-group">
+        <div class="custom-group-title">Sauces / Add-ons</div>
+        <label class="custom-option-row">
+          <input type="checkbox" class="custom-modifier-checkbox" data-name="Extra Cheese" data-price="20" onchange="calculateCustomTotalPrice()">
+          <span>Extra Cheese Sauce (+₱20)</span>
+        </label>
+      </div>
+    `;
+  } else if (m.cat === 'Coffee' || m.cat === 'Beverages') {
+    optionsHtml = `
+      <div class="custom-group">
+        <div class="custom-group-title">Beverage Size</div>
+        <div class="custom-radio-grid">
+          <label class="custom-radio-card"><input type="radio" name="drinkSizeOpt" value="Regular Size" checked onchange="calculateCustomTotalPrice()"> <span>Regular</span></label>
+          <label class="custom-radio-card"><input type="radio" name="drinkSizeOpt" value="Upgraded Large" data-price="20" onchange="calculateCustomTotalPrice()"> <span>Large (+₱20)</span></label>
+        </div>
+      </div>
+      <div class="custom-group">
+        <div class="custom-group-title">Sweetness Preferences</div>
+        <div class="custom-radio-grid">
+          <label class="custom-radio-card"><input type="radio" name="sweetOpt" value="50% Sweetness" onchange="calculateCustomTotalPrice()"> <span>50% Less</span></label>
+          <label class="custom-radio-card"><input type="radio" name="sweetOpt" value="Normal Sweetness" checked onchange="calculateCustomTotalPrice()"> <span>Normal</span></label>
+        </div>
+      </div>
+    `;
+  }
+  
+  document.getElementById('customOptionsContainer').innerHTML = optionsHtml;
+  calculateCustomTotalPrice();
+  document.getElementById('customOverlay').classList.add('show');
 }
+
+function adjustCustomQty(delta) {
+  customQty += delta;
+  if (customQty < 1) customQty = 1;
+  document.getElementById('customQtyInput').value = customQty;
+  calculateCustomTotalPrice();
+}
+
+function getActiveCustomModifiers() {
+  let modifiersPrice = 0;
+  let modifierLabels = [];
+  if (!currentCustomizeItem) return { price: 0, labels: [] };
+  
+  document.querySelectorAll('.custom-modifier-checkbox:checked').forEach(cb => {
+    modifiersPrice += parseFloat(cb.dataset.price || 0);
+    modifierLabels.push(cb.dataset.name);
+  });
+  
+  document.querySelectorAll('#customOptionsContainer input[type="radio"]:checked').forEach(radio => {
+    if (radio.dataset.price) modifiersPrice += parseFloat(radio.dataset.price);
+    if (!['Standard Serve', 'Normal Sweetness', 'Regular Size', 'Mild Spicy'].includes(radio.value)) {
+      modifierLabels.push(radio.value);
+    }
+  });
+  return { price: modifiersPrice, labels: modifierLabels };
+}
+
+function calculateCustomTotalPrice() {
+  if (!currentCustomizeItem) return;
+  const mods = getActiveCustomModifiers();
+  const overallTotal = (currentCustomizeItem.price + mods.price) * customQty;
+  document.getElementById('customConfirmBtn').textContent = `Confirm Selection — ${peso(overallTotal)}`;
+}
+
+function confirmCustomAdd() {
+  if (!currentCustomizeItem) return;
+  const mods = getActiveCustomModifiers();
+  const finalUnitPrice = currentCustomizeItem.price + mods.price;
+  const descriptiveSubNote = mods.labels.length > 0 ? mods.labels.join(', ') : currentCustomizeItem.note;
+  
+  cart.push({
+    id: currentCustomizeItem.id + '_' + Date.now(), 
+    name: currentCustomizeItem.name,
+    price: finalUnitPrice,
+    qty: customQty,
+    note: descriptiveSubNote
+  });
+  
+  closeOverlay('customOverlay');
+  renderCart();
+  flash();
+  toast(`${currentCustomizeItem.name} Added ✓`);
+}
+
+/* ---------- Cart ---------- */
 function changeQty(id,d){
   const line=cart.find(l=>l.id===id); if(!line) return;
   line.qty+=d; if(line.qty<=0) cart=cart.filter(l=>l.id!==id);
@@ -165,19 +307,26 @@ function calc(){
 function onDiscChange(){
   const dt=document.getElementById('discType').value;
   const inp=document.getElementById('discVal');
-  inp.style.display=(dt==='pct'||dt==='amt')?'block':'none';
-  if(dt!=='pct'&&dt!=='amt') inp.value='';
-  inp.placeholder = dt==='pct'?'%':'₱';
+  if(inp) {
+    inp.style.display=(dt==='pct'||dt==='amt')?'block':'none';
+    if(dt!=='pct'&&dt!=='amt') inp.value='';
+    inp.placeholder = dt==='pct'?'%':'₱';
+  }
   renderTotals();
 }
 function renderCart(){
   const box=document.getElementById('cartItems');
+  if(!box) return;
   if(!cart.length){
     box.innerHTML=`<div class="empty"><div class="big">🥢</div><div>No items yet.<br>Tap a dish to start.</div></div>`;
   }else{
     box.innerHTML=cart.map(l=>`
       <div class="line">
-        <div class="info"><div class="ln">${l.name}</div><div class="lp">${peso(l.price)} each</div></div>
+        <div class="info">
+          <div class="ln">${l.name}</div>
+          <div class="lp">${peso(l.price)} each</div>
+          ${l.note ? `<div style="font-size:11px; color:var(--primary); font-weight:500; margin-top:2px;">↳ ${l.note}</div>` : ''}
+        </div>
         <div class="qty">
           <button onclick="changeQty('${l.id}',-1)">−</button>
           <span>${l.qty}</span>
@@ -194,10 +343,15 @@ function renderTotals(){
   let html=`<div class="t"><span>Subtotal (${cart.reduce((s,l)=>s+l.qty,0)} items)</span><span>${peso(subtotal)}</span></div>`;
   if(discount>0) html+=`<div class="t disc"><span>${label}</span><span>−${peso(discount)}</span></div>`;
   html+=`<div class="grand"><span class="lbl">TOTAL</span><span class="amt">${peso(total)}</span></div>`;
-  document.getElementById('totals').innerHTML=html;
+  
+  const totalsBox = document.getElementById('totals');
+  if(totalsBox) totalsBox.innerHTML=html;
+  
   const btn=document.getElementById('payBtn');
-  btn.disabled=!cart.length;
-  btn.textContent='Charge '+peso(total);
+  if(btn) {
+    btn.disabled=!cart.length;
+    btn.textContent='Charge '+peso(total);
+  }
   const mb=document.getElementById('mobBadge');
   if(mb){ mb.textContent=cart.reduce((s,l)=>s+l.qty,0)+' · '+peso(total);
     document.getElementById('mobCartBtn').style.display=cart.length?'flex':'none'; }
@@ -214,7 +368,6 @@ function setPayMethod(m){
   payMethod=m;
   document.querySelectorAll('#payMethods button').forEach(b=>b.classList.toggle('active',b.dataset.m===m));
   
-  // Clean, consolidated system mapping matching database keys exactly
   const qrMethods = {
     'Gcash': 'Qr/qr-gcash.png',
     'Maya': 'Qr/qr-maya.png',
@@ -227,11 +380,11 @@ function setPayMethod(m){
     const labels = {'Gcash':'GCash Payment','Maya':'Maya Payment','qrph':'QRph Payment','visa':'Visa Payment'};
     document.getElementById('qrLabel').textContent = labels[m];
     document.getElementById('qrImage').src = qrMethods[m];
-    qrDisplay.classList.add('show');
+    if(qrDisplay) qrDisplay.classList.add('show');
     document.getElementById('cashFld').style.display = 'none';
     document.getElementById('quickCash').style.display = 'none';
   }else{
-    qrDisplay.classList.remove('show');
+    if(qrDisplay) qrDisplay.classList.remove('show');
     document.getElementById('cashFld').style.display = 'block';
     document.getElementById('quickCash').style.display = 'flex';
   }
@@ -252,7 +405,8 @@ function openPay(){
 function setCash(v){ document.getElementById('cashInput').value=v; renderPay(); }
 function syncCashier(val){
   DB.set(DB.CASHIER, val);
-  document.getElementById('cashierName').value = val;
+  const cn = document.getElementById('cashierName');
+  if (cn) cn.value = val;
 }
 function renderPay(){
   const {subtotal,discount,label,total}=calc();
@@ -286,7 +440,6 @@ function renderPay(){
   cp.style.opacity = cp.disabled?'.45':'1';
 }
 function confirmPayment(){
-  const orders=DB.get(DB.ORDERS,[]); orders.unshift(order); DB.set(DB.ORDERS,orders);
   const {subtotal,discount,label,total}=calc();
   const qrMethods = ['Gcash','Maya','qrph','visa'];
   const isQR = qrMethods.includes(payMethod);
@@ -306,6 +459,33 @@ function confirmPayment(){
     cash: isQR ? total : parseFloat(document.getElementById('cashInput').value)||0,
     change: isQR ? 0 : (parseFloat(document.getElementById('cashInput').value)||0) - total
   };
+
+  // Safe Cloud Bridge Stream Insertion
+  if (supabaseClient) {
+    supabaseClient.from('orders')
+      .insert([{
+        order_no: order.no,
+        items: order.items, 
+        subtotal: order.subtotal,
+        discount: order.discount,
+        disc_label: order.discLabel,
+        total: order.total,
+        type: orderType,
+        method: payMethod,
+        cashier: order.cashier,
+        cash_tendered: order.cash,
+        change_due: order.change
+      }])
+      .then(({ error }) => {
+        if (error) {
+          console.error("Supabase Error:", error);
+          toast("❌ Cloud Save Failed!");
+        } else {
+          toast("☁️ Cloud Synced!");
+        }
+      });
+  }
+
   const orders=DB.get(DB.ORDERS,[]); orders.unshift(order); DB.set(DB.ORDERS,orders);
   DB.set(DB.COUNTER,no);
   closeOverlay('payOverlay');
@@ -414,7 +594,7 @@ function exportCSV(){
 /* ---------- Menu Manager ---------- */
 function renderManager(){
   document.getElementById('mgrGrid').innerHTML=menu.map(m=>{
-    const thumb=m.img?`<img src="${m.img}">`:`<span>${CAT_EMOJI[m.cat]||'🍽'}</span>`;
+    const thumb=m.img?`<img src="${m.img}">`:`<span>🍽</span>`;
     const bg=m.img?'':`style="background:${CAT_GRAD[m.cat]}"`;
     return `<div class="mcard">
       <div class="mthumb" ${bg}>${thumb}</div>
@@ -440,7 +620,7 @@ function openItemEdit(id){
 function updatePrev(cat){
   const p=document.getElementById('fPrev');
   if(pendingImg){ p.innerHTML=`<img src="${pendingImg}">`; document.getElementById('fRemove').style.display='block'; }
-  else { p.innerHTML=CAT_EMOJI[cat]||'🍽'; p.style.background=CAT_GRAD[cat]||'#333'; document.getElementById('fRemove').style.display='none'; }
+  else { p.innerHTML='🍽'; p.style.background=CAT_GRAD[cat]||'#333'; document.getElementById('fRemove').style.display='none'; }
 }
 function onImgPick(e){
   const f=e.target.files[0]; if(!f) return;
