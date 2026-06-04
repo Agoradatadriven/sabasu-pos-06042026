@@ -7,6 +7,68 @@
 const SUPABASE_URL = 'https://vddvsbveybvnqrfydfjr.supabase.co'; 
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkZHZzYnZleWJ2bnFyZnlkZmpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NzI1NjAsImV4cCI6MjA5NjE0ODU2MH0.TX13Ptf-Zh_RKoAb0hyczqyvhAiQkYCnhh40Ir8P9i8';
 
+/* ---------- Authentication State Engine ---------- */
+async function initAuth() {
+  if (!supabaseClient) return;
+
+  // Check for an existing active user session
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  toggleAuthUI(session);
+
+  // Permanently listen to auth state updates (Logins / Logouts)
+  supabaseClient.auth.onAuthStateChange((_event, session) => {
+    toggleAuthUI(session);
+  });
+}
+
+function toggleAuthUI(session) {
+  const appElement = document.getElementById('app');
+  const loginElement = document.getElementById('loginView');
+  
+  if (session) {
+    if (appElement) appElement.style.display = 'flex';
+    if (loginElement) loginElement.style.display = 'none';
+    
+    // Automatically inherit cashier identity from staff login metadata email prefix
+    const cashierInput = document.getElementById('cashierName');
+    if (cashierInput && !cashierInput.value) {
+      const emailPrefix = session.user.email.split('@')[0];
+      cashierInput.value = emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
+      DB.set(DB.CASHIER, cashierInput.value);
+    }
+  } else {
+    if (appElement) appElement.style.display = 'none';
+    if (loginElement) loginElement.style.display = 'flex';
+  }
+}
+
+async function handleLogin(e) {
+  e.preventDefault();
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const loginBtn = document.getElementById('loginBtn');
+
+  if (!supabaseClient) return;
+  
+  loginBtn.disabled = true;
+  loginBtn.textContent = 'Authenticating...';
+
+  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  
+  if (error) {
+    alert('Authentication Failed: ' + error.message);
+    loginBtn.disabled = false;
+    loginBtn.textContent = 'Sign In';
+  }
+}
+
+async function handleSignOut() {
+  if (!supabaseClient) return;
+  const confirmLeave = confirm('Are you sure you want to sign out of this terminal session?');
+  if (confirmLeave) {
+    await supabaseClient.auth.signOut();
+  }
+}
 // Fixed initialization syntax for CDN script tag integration
 const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
@@ -681,3 +743,8 @@ document.getElementById('fCat').addEventListener('change',e=>{ if(!pendingImg) u
 /* ---------- Init ---------- */
 initCashier();
 renderCats(); renderMenu(); renderCart(); onDiscChange();
+
+/* ---------- Init ---------- */
+initCashier();
+renderCats(); renderMenu(); renderCart(); onDiscChange();
+initAuth(); // Launches auth session verification triggers

@@ -12,6 +12,30 @@
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+
+  <div id="loginView" class="auth-container" style="display: none;">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h2>SABASU POS</h2>
+      <p>Terminal Authentication Required</p>
+    </div>
+    <form onsubmit="handleLogin(event)">
+      <div class="fld">
+        <label>Email Address</label>
+        <input id="loginEmail" type="email" placeholder="cashier@sabasu.com" required autocomplete="username">
+      </div>
+      <div class="fld" style="margin-bottom: 20px;">
+        <label>Password</label>
+        <input id="loginPassword" type="password" placeholder="Enter password" required autocomplete="current-password">
+      </div>
+      <button type="submit" id="loginBtn" class="btn btn-pay" style="width: 100%; padding: 14px;">Sign In</button>
+    </form>
+  </div>
+</div>
+
+<div id="app" style="display: none;">
+  <header class="topbar">
+
 <div id="app">
   <header class="topbar">
     <div class="brand">
@@ -32,6 +56,10 @@
     </div>
 
     <nav class="topnav">
+      <button data-view="pos" class="active"><span class="lbl">ORDER</span></button>
+      <button data-view="hist"><span class="lbl">RECORDS</span></button>
+      <button data-view="mgr"><span class="lbl">ADD ITEM</span></button>
+      <button id="signOutBtn" onclick="handleSignOut()" style="color: var(--red); font-weight: 700; border-left: 1px solid var(--line-strong); padding-left: 15px; margin-left: 5px;">SIGN OUT</button>
       <button data-view="pos" class="active"><span class="ic"></span><span class="lbl">ORDER</span></button>
       <button data-view="hist"><span class="ic"></span><span class="lbl">RECORDS</span></button>
       <button data-view="mgr"><span class="ic"></span><span class="lbl">ADD ITEM</span></button>

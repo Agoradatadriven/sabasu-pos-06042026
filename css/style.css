@@ -1692,4 +1692,48 @@ main {
   .rc-actions {
     display: none !important;
   }
+  /* ---------- Authentication Layout Screens ---------- */
+.auth-container {
+  position: fixed;
+  inset: 0;
+  background-color: var(--bg-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.auth-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--line-strong);
+  border-radius: 20px;
+  padding: 35px 30px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: var(--shadow);
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.auth-header h2 {
+  font-family: "Shippori Mincho B1", serif;
+  font-weight: 800;
+  font-size: 26px;
+  margin: 0 0 4px 0;
+  letter-spacing: 1px;
+  color: var(--primary);
+}
+
+.auth-header p {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  color: var(--ink-muted);
+  margin: 0;
+}
 }
