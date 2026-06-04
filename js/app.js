@@ -199,69 +199,33 @@ function openCart(){ document.getElementById('cart').classList.add('open'); }
 function closeCart(){ document.getElementById('cart').classList.remove('open'); }
 
 /* ---------- Payment ---------- */
-// Variable to store the currently selected payment method
-function setPayMethod(method) {
-    // 1. Sync global state tracking for receipts
-    if (typeof currentPayMethod !== 'undefined') {
-        currentPayMethod = method;
-    }
-
-    // 2. Toggle active style modifier on navigation buttons
-    document.querySelectorAll('.pay-methods button').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    const activeBtn = document.querySelector(`.pay-methods button[data-m="${method}"]`);
-    if (activeBtn) activeBtn.classList.add('active');
-
-    // 3. Cache DOM UI elements
-    const qrContainer = document.getElementById('qrContainer');
-    const qrImage = document.getElementById('qrImage');
-    const qrLabel = document.getElementById('qrLabel');
-    const cashFld = document.getElementById('cashFld');
-    const quickCash = document.getElementById('quickCash');
-
-    // Dictionary maps raw identifiers to clean presentation titles
-    const paymentNames = {
-        'Gcash': 'GCash',
-        'Maya': 'Maya',
-        'qrph': 'QRph',
-        'visa': 'Visa'
-    };
-
-    // 4. View state control logic switch
-    if (paymentNames[method]) {
-        // Digital Route: Render QR workspace and hide cash modifiers
-        if (qrContainer) qrContainer.style.display = 'block';
-        if (cashFld) cashFld.style.display = 'none';
-        if (quickCash) quickCash.style.display = 'none';
-
-        // Bind dynamic textual headers and target image assets
-        if (qrLabel) qrLabel.innerText = `Scan to Pay via ${paymentNames[method]}`;
-        if (qrImage) qrImage.src = `PNG/qr-${method.toLowerCase()}.png`;
-
-    } else {
-        // Fiat Route: Terminate QR viewport and display standard currency layouts
-        if (qrContainer) qrContainer.style.display = 'none';
-        if (cashFld) cashFld.style.display = 'block';
-        if (quickCash) quickCash.style.display = 'flex';
-        
-        // Auto-focus text field for rapid numeric keypad typing
-        const cashInput = document.getElementById('cashInput');
-        if (cashInput && method === 'Cash') {
-            cashInput.focus();
-        }
-    }
-
-    // 5. Fire core transactional ledger recalculations
-    if (typeof renderPay === 'function') {
-        renderPay();
-    }
-}
 function setPayMethod(m){
   payMethod=m;
   document.querySelectorAll('#payMethods button').forEach(b=>b.classList.toggle('active',b.dataset.m===m));
-  document.getElementById('cashFld').style.display = m==='Cash'?'block':'none';
-  document.getElementById('quickCash').style.display = m==='Cash'?'flex':'none';
+  
+  // QR code methods
+  const qrMethods = {
+    'GCash': 'qr-gcash.png',
+    'Maya': 'qr-maya.png',
+    'QRph': 'qr-qrph.png',
+    'Visa': 'qr-visa.png'
+  };
+  
+  const qrDisplay = document.getElementById('qrDisplay');
+  if(qrMethods[m]){
+    // Show QR code for this payment method
+    const labels = {'GCash':'GCash Payment','Maya':'Maya Payment','QRph':'QRph Payment','Visa':'Visa Payment'};
+    document.getElementById('qrLabel').textContent = labels[m];
+    document.getElementById('qrImage').src = qrMethods[m];
+    qrDisplay.classList.add('show');
+    document.getElementById('cashFld').style.display = 'none';
+    document.getElementById('quickCash').style.display = 'none';
+  }else{
+    // Show cash input for cash payment
+    qrDisplay.classList.remove('show');
+    document.getElementById('cashFld').style.display = 'block';
+    document.getElementById('quickCash').style.display = 'flex';
+  }
   renderPay();
 }
 function openPay(){
@@ -283,26 +247,51 @@ function syncCashier(val){
 }
 function renderPay(){
   const {subtotal,discount,label,total}=calc();
-  const cash=parseFloat(document.getElementById('cashInput').value)||0;
+  const qrMethods = ['GCash','Maya','QRph','Visa'];
+  const isQR = qrMethods.includes(payMethod);
+  
   let html=`<div class="r"><span>Subtotal</span><span>${peso(subtotal)}</span></div>`;
   if(discount>0) html+=`<div class="r" style="color:#3fae6f"><span>${label}</span><span>−${peso(discount)}</span></div>`;
   html+=`<div class="r total"><span>Amount Due</span><span>${peso(total)}</span></div>`;
-  if(payMethod==='Cash'){
+  
+  if(!isQR && payMethod==='Cash'){
+    // Show cash and change for cash payment
+    const cash=parseFloat(document.getElementById('cashInput').value)||0;
     const change=cash-total;
     html+=`<div class="r"><span>Cash</span><span>${peso(cash)}</span></div>`;
     html+=`<div class="r change"><span>Change</span><span>${cash>=total?peso(change):'—'}</span></div>`;
-  }else{
-    html+=`<div class="r"><span>Method</span><span>${payMethod}</span></div>`;
+  }else if(isQR){
+    // For QR methods, show the payment method
+    html+=`<div class="r"><span>Payment Method</span><span>${payMethod}</span></div>`;
   }
+  
   document.getElementById('paySummary').innerHTML=html;
   const cp=document.getElementById('confirmPay');
-  cp.disabled = payMethod==='Cash' && cash<total;
+  
+  // Enable button for QR methods or when cash is sufficient
+  if(isQR){
+    cp.disabled = false;
+    cp.textContent = 'Complete Sale';
+  }else{
+    const cash=parseFloat(document.getElementById('cashInput').value)||0;
+    cp.disabled = cash<total;
+    cp.textContent = cp.disabled ? 'Insufficient Cash' : 'Complete Sale';
+  }
   cp.style.opacity = cp.disabled?'.45':'1';
 }
 function confirmPayment(){
   const {subtotal,discount,label,total}=calc();
-  const cash=parseFloat(document.getElementById('cashInput').value)||0;
-  if(payMethod==='Cash' && cash<total){ toast('Insufficient cash'); return; }
+  
+  // QR code payment methods don't require cash tendered
+  const qrMethods = ['GCash','Maya','QRph','Visa'];
+  const isQR = qrMethods.includes(payMethod);
+  
+  if(!isQR){
+    // Cash payment requires amount
+    const cash=parseFloat(document.getElementById('cashInput').value)||0;
+    if(cash<total){ toast('Insufficient cash'); return; }
+  }
+  
   const no=currentOrderNo();
   const order={
     no, ts:Date.now(),
@@ -310,8 +299,8 @@ function confirmPayment(){
     subtotal, discount, discLabel:label, total,
     type:orderType, method:payMethod,
     cashier: getCashier(),
-    cash: payMethod==='Cash'?cash:total,
-    change: payMethod==='Cash'?cash-total:0
+    cash: isQR ? total : parseFloat(document.getElementById('cashInput').value)||0,
+    change: isQR ? 0 : (parseFloat(document.getElementById('cashInput').value)||0) - total
   };
   const orders=DB.get(DB.ORDERS,[]); orders.unshift(order); DB.set(DB.ORDERS,orders);
   DB.set(DB.COUNTER,no);
