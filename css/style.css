@@ -234,7 +234,7 @@ main {
   display: flex;
 }
 
-/* ---------- POS View Layout ---------- */
+/* ---------- POS Kiosk Main Layout ---------- */
 .pos {
   width: 100%;
   height: 100%;
@@ -246,27 +246,39 @@ main {
   flex: 1;
   min-width: 0;
   display: flex;
-  flex-direction: column;
+  flex-direction: row; /* Side-by-side arrangement for vertical sidebar look */
   padding: 16px 18px;
-  gap: 14px;
+  gap: 18px;
 }
 
+/* Left-aligned Vertical Category Navigation Sidebar */
 .cats {
   display: flex;
-  gap: 9px;
-  flex-wrap: wrap;
+  flex-direction: column; 
+  gap: 10px;
+  width: 210px;           /* Set sidebar column width size */
+  flex-shrink: 0;
+  overflow-y: auto;       /* Infinite downward scrolling capabilities */
+  padding-right: 6px;
+  align-content: start;
 }
 
+/* Full-width Kiosk Sidebar Selection Form Fields */
 .cat {
-  padding: 9px 16px;
-  border-radius: 999px;
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 14px;
   background: var(--bg-surface);
   border: 1px solid var(--line-strong);
   color: var(--ink-muted);
   transition: 0.15s;
   white-space: nowrap;
+  text-align: left;       /* Flush left structural typography alignment */
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .cat.active {
@@ -1102,6 +1114,49 @@ main {
   border-color: var(--primary);
 }
 
+/* Dynamic Interactive QR Drawer Display */
+.qr-display {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin: 15px 0;
+  padding: 16px;
+  border: 2px dashed var(--primary);
+  border-radius: 12px;
+  background: var(--bg-main);
+}
+
+.qr-display.show {
+  display: flex;
+}
+
+.qr-label {
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  letter-spacing: 0.5px;
+}
+
+.qr-img img {
+  max-width: 160px;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid var(--line-strong);
+  background: #fff;
+  padding: 6px;
+}
+
+.qr-text {
+  font-size: 12px;
+  color: var(--ink-muted);
+  margin-top: 10px;
+  font-weight: 500;
+}
+
 /* Scaling Rules for Icons inside Grid Fields */
 .pay-icon {
   width: 18px !important;
@@ -1349,7 +1404,7 @@ main {
   transform: translateX(-50%) translateY(0);
 }
 
-/* ---------- Mobile Layout Scales ---------- */
+/* ---------- Mobile Layout Responsive Breakpoints ---------- */
 .mobile-cart-btn {
   display: none;
 }
@@ -1369,6 +1424,25 @@ main {
 @media(max-width: 920px) {
   .pos {
     flex-direction: column;
+  }
+
+  .menu-area {
+    flex-direction: column; /* Reverts sidebar track into vertical stack layout on small mobile screen boundaries */
+    padding-bottom: 84px;
+  }
+  
+  .cats {
+    flex-direction: row;    /* Re-enables touch-friendly horizontal ribbon bar scroll on mobile viewports */
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 4px;
+  }
+  
+  .cat {
+    width: auto;
+    padding: 9px 16px;
+    text-align: center;
   }
   
   .cart {
@@ -1414,10 +1488,6 @@ main {
     font-family: "JetBrains Mono", monospace;
   }
   
-  .menu-area {
-    padding-bottom: 84px;
-  }
-  
   .brand .sub {
     display: none;
   }
@@ -1444,7 +1514,6 @@ main {
     padding: 9px 13px;
   }
   
-  /* Drop absolute header clock layout on tiny mobile screens */
   .clock {
     display: none !important;
   }
