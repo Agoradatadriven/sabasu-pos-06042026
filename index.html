@@ -32,9 +32,9 @@
     </div>
 
     <nav class="topnav">
-      <button data-view="pos" class="active"><span class="ic">🍜</span><span class="lbl">ORDER</span></button>
-      <button data-view="hist"><span class="ic">📊</span><span class="lbl">RECORDS</span></button>
-      <button data-view="mgr"><span class="ic">🧾</span><span class="lbl">ADD ITEM</span></button>
+      <button data-view="pos" class="active"><span class="ic">🍜</span><span class="lbl">Order</span></button>
+      <button data-view="hist"><span class="ic">📊</span><span class="lbl">Sales</span></button>
+      <button data-view="mgr"><span class="ic">🧾</span><span class="lbl">Menu</span></button>
     </nav>
     <div class="clock" id="clock"></div>
   </header>
@@ -114,51 +114,34 @@
 <!-- ============ PAYMENT MODAL ============ -->
 <div class="overlay" id="payOverlay">
   <div class="modal">
-    <div class="modal-head">
-      <h3>Payment</h3>
-      <button class="x" onclick="closeOverlay('payOverlay')">×</button>
-    </div>
-    
+    <div class="modal-head"><h3>Payment</h3><button class="x" onclick="closeOverlay('payOverlay')">×</button></div>
     <div class="modal-body">
       <div class="pay-summary" id="paySummary"></div>
-      
       <div class="pay-methods" id="payMethods">
-        <button class="active" data-m="Cash" onclick="setPayMethod('Cash')">
-          💵 Cash
-        </button>
-        <button data-m="Gcash" onclick="setPayMethod('Gcash')">
-          <img src="Icon/icon-gcash.png" alt="GCash" class="pay-icon"> GCash
-        </button>
-        <button data-m="Maya" onclick="setPayMethod('Maya')">
-          <img src="Icon/icon-maya.jpg" alt="Maya" class="pay-icon"> Maya
-        </button>
-        <button data-m="qrph" onclick="setPayMethod('qrph')">
-          <img src="Icon/icon-qrph.png" alt="QRph" class="pay-icon"> QRph
-        </button>
-        <button data-m="visa" onclick="setPayMethod('visa')">
-          <img src="Icon/icon-visa.png" alt="Visa" class="pay-icon"> Visa
-        </button>
+        <button class="active" data-m="Cash" onclick="setPayMethod('Cash')">💵 Cash</button>
+        <button data-m="GCash" onclick="setPayMethod('GCash')">📱 GCash</button>
+        <button data-m="Maya" onclick="setPayMethod('Maya')">📱 Maya</button>
+        <button data-m="QRph" onclick="setPayMethod('QRph')">🏦 QRph</button>
+        <button data-m="Visa" onclick="setPayMethod('Visa')">💳 Visa</button>
       </div>
 
-      <!-- Inside index.html, right below your closing </div_for_payMethods> -->
-      <div id="qrContainer" style="display: none; text-align: center; margin: 15px 0; padding: 12px; border: 2px dashed #4a3f6b; border-radius: 8px; background: #1f1a2e;">
-        <p id="qrLabel" style="color: #fff; margin: 0 0 8px 0; font-size: 14px; font-weight: bold; font-family: sans-serif; text-transform: uppercase; letter-spacing: 0.5px;"></p>
-        <img id="qrImage" src="" alt="Scan QR Code" style="max-width: 150px; width: 100%; border-radius: 6px; display: inline-block;">
+      <!-- QR Code Display -->
+      <div class="qr-display" id="qrDisplay">
+        <div class="qr-label" id="qrLabel">GCash Payment</div>
+        <div class="qr-img"><img id="qrImage" src="" alt="QR Code"></div>
+        <div class="qr-text">📱 Customer scans the QR code with their phone</div>
       </div>
 
       <div class="fld">
         <label>Cashier on this Receipt</label>
         <input id="payCashier" type="text" placeholder="Enter cashier name" maxlength="24" oninput="syncCashier(this.value)">
       </div>
-      
       <div class="fld bignum" id="cashFld">
         <label>Cash Tendered</label>
         <input id="cashInput" type="number" min="0" placeholder="0" oninput="renderPay()">
       </div>
-      
       <div class="quick-cash" id="quickCash"></div>
-      
-      <button class="btn btn-pay" id="confirmPay" style="width: 100%;" onclick="confirmPayment()">Complete Sale</button>
+      <button class="btn btn-pay" id="confirmPay" style="width:100%" onclick="confirmPayment()">Complete Sale</button>
     </div>
   </div>
 </div>
@@ -219,6 +202,6 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="js/app.js?v=2"></script>
+<script src="js/app.js"></script>
 </body>
 </html>
