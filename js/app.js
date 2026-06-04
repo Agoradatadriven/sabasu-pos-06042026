@@ -192,53 +192,55 @@ function closeCart(){ document.getElementById('cart').classList.remove('open'); 
 
 /* ---------- Payment ---------- */
 // Variable to store the currently selected payment method
-let currentPayMethod = 'Cash';
-
 function setPayMethod(method) {
-    currentPayMethod = method;
+    // 1. Global state tracking (Ensures your receipt records the correct method)
+    if (typeof currentPayMethod !== 'undefined') {
+        currentPayMethod = method;
+    }
 
-    // 1. Update active UI states for buttons
-    document.querySelectorAll('.pay-methods button').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    const selectedBtn = document.querySelector(`.pay-methods button[data-m="${method}"]`);
-    if (selectedBtn) selectedBtn.classList.add('active');
+    // 2. Highlight the active button layout
+    document.querySelectorAll('.pay-methods button').forEach(btn => btn.classList.remove('active'));
+    const activeBtn = document.querySelector(`.pay-methods button[data-m="${method}"]`);
+    if (activeBtn) activeBtn.classList.add('active');
 
-    // 2. Get DOM Elements
+    // 3. Grab UI elements
     const qrContainer = document.getElementById('qrContainer');
     const qrImage = document.getElementById('qrImage');
     const qrLabel = document.getElementById('qrLabel');
     const cashFld = document.getElementById('cashFld');
     const quickCash = document.getElementById('quickCash');
 
-    // 3. Conditional visibility check based on selection
-    if (['Gcash', 'Maya', 'qrph'].includes(method)) {
-        // Show QR section, hide cash inputs
-        qrContainer.style.display = 'block';
+    // Dictionary to clean up UI display labels neatly
+    const paymentNames = {
+        'Gcash': 'GCash',
+        'Maya': 'Maya',
+        'qrph': 'QRph',
+        'visa': 'Visa'
+    };
+
+    // 4. Interface control switch
+    if (paymentNames[method]) {
+        // Digital Payment: Show QR block, hide cash tools
+        if (qrContainer) qrContainer.style.display = 'block';
         if (cashFld) cashFld.style.display = 'none';
         if (quickCash) quickCash.style.display = 'none';
-        
-        // Update Label Text
-        qrLabel.innerText = `Scan to Pay via ${method}`;
-        
-        /* OPTION A: Using real static images saved in your project directory 
-           Ensure you have 'images/qr-gcash-main.png' etc., or update the string to match your paths.
-        */
-        qrImage.src = `images/qr-${method.toLowerCase()}-main.png`;
 
-        /* OPTION B (Alternative): Dynamic QR Code API generation
-           If you want an instantly functional QR code for testing, uncomment the line below.
-           qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=SabasuNoodleBar-${method}`;
-        */
-        
+        // Update display text values and source path dynamically
+        if (qrLabel) qrLabel.innerText = `Scan to Pay via ${paymentNames[method]}`;
+        if (qrImage) qrImage.src = `qr-${method.toLowerCase()}.png`;
+
     } else {
-        // Fallback for Cash or Visa: Hide QR code panel, show standard inputs
-        qrContainer.style.display = 'none';
+        // Cash Payment: Hide QR code view and restore standard numerical keyboard inputs
+        if (qrContainer) qrContainer.style.display = 'none';
         if (cashFld) cashFld.style.display = 'block';
         if (quickCash) quickCash.style.display = 'flex';
+        
+        // Optional Quality-of-Life: Clear old cash inputs when changing methods
+        const cashInput = document.getElementById('cashInput');
+        if (cashInput && method === 'Cash') cashInput.focus();
     }
-    
-    // 4. Trigger validation or recalculation logic if it exists in your app
+
+    // 5. Run calculations / safety checks
     if (typeof renderPay === 'function') {
         renderPay();
     }

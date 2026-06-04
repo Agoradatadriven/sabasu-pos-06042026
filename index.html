@@ -120,15 +120,15 @@
       
       <div class="pay-methods" id="payMethods">
         <button class="active" data-m="Cash" onclick="setPayMethod('Cash')">💵 Cash</button>
-        <button data-m="Gcash" onclick="setPayMethod('Gcash')"> <img src="qr-gcash.png" alt="Gcash" class="pay-icon" /> Gcash </button>
-        <button data-m="Maya" onclick="setPayMethod('Maya')"> <img src="qr-maya.png" alt="Maya" class="pay-icon" /> Maya </button>
-        <button data-m="qrph" onclick="setPayMethod('qrph')"> <img src="qr-qrph.png" alt="QRph" class="pay-icon" /> QRph </button>
-        <button data-m="visa" onclick="setPayMethod('visa')"> <img src="qr-visa.png" alt="Visa" class="pay-icon" /> Visa </button>
+        <button data-m="Gcash" onclick="setPayMethod('Gcash')">📳 GCash</button>
+        <button data-m="Maya" onclick="setPayMethod('Maya')">💳 Maya</button>
+        <button data-m="qrph" onclick="setPayMethod('qrph')">📱 QRph</button>
+        <button data-m="visa" onclick="setPayMethod('visa')">💳 Visa</button>
       </div>
 
-      <div id="qrContainer" style="display: none; text-align: center; margin: 20px 0; padding: 15px; border: 2px dashed #e0e0e0; border-radius: 12px; background: #ffffff;">
-        <p id="qrLabel" style="color: #16121f; margin-top: 0; margin-bottom: 10px; font-weight: 700; font-family: 'Zen Kaku Gothic New', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;"></p>
-        <img id="qrImage" src="" alt="Payment QR Code" style="max-width: 180px; width: 100%; height: auto; border-radius: 6px; display: inline-block;">
+      <div id="qrContainer" style="display: none; text-align: center; margin: 15px 0; padding: 12px; border: 2px dashed #4a3f6b; border-radius: 8px; background: #1f1a2e;">
+        <p id="qrLabel" style="color: #fff; margin: 0 0 8px 0; font-size: 14px; font-weight: bold; font-family: sans-serif; text-transform: uppercase; letter-spacing: 0.5px;"></p>
+        <img id="qrImage" src="" alt="Scan QR Code" style="max-width: 150px; width: 100%; border-radius: 6px; display: inline-block;">
       </div>
 
       <div class="fld">
