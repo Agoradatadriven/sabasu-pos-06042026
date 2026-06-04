@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#16121f">
+<title>SABASU Noodle Bar — POS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">鯖</div>
+      <div>
+        <h1>SABASU <span style="color:var(--red)">Noodle Bar</span></h1>
+        <div class="sub">Point of Sale</div>
+      </div>
+    </div>
+
+    <!-- Editable cashier name -->
+    <div class="cashier">
+      <span class="ic">👤</span>
+      <div>
+        <div class="lab">Cashier</div>
+        <input id="cashierName" type="text" placeholder="Enter name" maxlength="24" autocomplete="off">
+      </div>
+    </div>
+
+    <nav class="topnav">
+      <button data-view="pos" class="active"><span class="ic">🍜</span><span class="lbl">Order</span></button>
+      <button data-view="hist"><span class="ic">📊</span><span class="lbl">Sales</span></button>
+      <button data-view="mgr"><span class="ic">🧾</span><span class="lbl">Menu</span></button>
+    </nav>
+    <div class="clock" id="clock"></div>
+  </header>
+
+  <main>
+    <!-- ============ POS VIEW ============ -->
+    <section class="view active" id="view-pos">
+      <div class="pos">
+        <div class="menu-area">
+          <div class="cats" id="cats"></div>
+          <div class="grid" id="menuGrid"></div>
+        </div>
+        <aside class="cart" id="cart">
+          <div class="cart-head">
+            <h2>Current Order</h2>
+            <span class="ordno" id="ordNo">#000</span>
+            <button class="closecart" onclick="closeCart()">×</button>
+          </div>
+          <div class="ordertype">
+            <button id="btnDine" class="active" onclick="setType('Dine In')">🪑 Dine In</button>
+            <button id="btnTake" onclick="setType('Take Out')">🥡 Take Out (C/O)</button>
+          </div>
+          <div class="cart-items" id="cartItems"></div>
+          <div class="cart-foot">
+            <div class="disc-row">
+              <select id="discType" onchange="onDiscChange()">
+                <option value="none">No Discount</option>
+                <option value="senior">Senior Citizen (20%)</option>
+                <option value="pwd">PWD (20%)</option>
+                <option value="pct">Custom %</option>
+                <option value="amt">Custom ₱</option>
+              </select>
+              <input id="discVal" type="number" min="0" placeholder="0" style="display:none" oninput="renderTotals()">
+            </div>
+            <div class="totals" id="totals"></div>
+            <div class="actions">
+              <button class="btn btn-clear" onclick="clearCart()" title="Clear order">🗑</button>
+              <button class="btn btn-pay" id="payBtn" onclick="openPay()" disabled>Charge ₱0</button>
+            </div>
+          </div>
+        </aside>
+      </div>
+      <button class="mobile-cart-btn" id="mobCartBtn" onclick="openCart()" style="display:none">
+        <span>View Order</span><span class="badge" id="mobBadge">0 · ₱0</span>
+      </button>
+    </section>
+
+    <!-- ============ SALES / HISTORY VIEW ============ -->
+    <section class="view" id="view-hist">
+      <div class="hist">
+        <div class="hist-top">
+          <h2>Sales &amp; Transactions</h2>
+          <div class="stats" id="stats"></div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <button class="btn-ghost" onclick="exportCSV()">⬇ Export CSV</button>
+          <button class="btn-ghost" onclick="clearHistory()" style="color:var(--red)">Clear All Sales</button>
+        </div>
+        <div class="hist-list" id="histList"></div>
+      </div>
+    </section>
+
+    <!-- ============ MENU MANAGER VIEW ============ -->
+    <section class="view" id="view-mgr">
+      <div class="mgr">
+        <div class="mgr-top">
+          <h2>Menu Manager</h2>
+          <button class="btn-add" style="margin-left:auto" onclick="openItemEdit(null)">＋ Add Item</button>
+          <button class="btn-ghost" onclick="resetMenu()">Reset to Default</button>
+        </div>
+        <div class="mgr-grid" id="mgrGrid"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ============ PAYMENT MODAL ============ -->
+<div class="overlay" id="payOverlay">
+  <div class="modal">
+    <div class="modal-head"><h3>Payment</h3><button class="x" onclick="closeOverlay('payOverlay')">×</button></div>
+    <div class="modal-body">
+      <div class="pay-summary" id="paySummary"></div>
+      
+      <div class="pay-methods" id="payMethods">
+        <button class="active" data-m="Cash" onclick="setPayMethod('Cash')">💵 Cash</button>
+        <button data-m="Gcash" onclick="setPayMethod('Gcash')"> <img src="qr-gcash.png" alt="Gcash" class="pay-icon" /> Gcash </button>
+        <button data-m="Maya" onclick="setPayMethod('Maya')"> <img src="qr-maya.png" alt="Maya" class="pay-icon" /> Maya </button>
+        <button data-m="qrph" onclick="setPayMethod('qrph')"> <img src="qr-qrph.png" alt="QRph" class="pay-icon" /> QRph </button>
+        <button data-m="visa" onclick="setPayMethod('visa')"> <img src="qr-visa.png" alt="Visa" class="pay-icon" /> Visa </button>
+      </div>
+
+      <div id="qrContainer" style="display: none; text-align: center; margin: 20px 0; padding: 15px; border: 2px dashed #e0e0e0; border-radius: 12px; background: #ffffff;">
+        <p id="qrLabel" style="color: #16121f; margin-top: 0; margin-bottom: 10px; font-weight: 700; font-family: 'Zen Kaku Gothic New', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;"></p>
+        <img id="qrImage" src="" alt="Payment QR Code" style="max-width: 180px; width: 100%; height: auto; border-radius: 6px; display: inline-block;">
+      </div>
+
+      <div class="fld">
+        <label>Cashier on this Receipt</label>
+        <input id="payCashier" type="text" placeholder="Enter cashier name" maxlength="24" oninput="syncCashier(this.value)">
+      </div>
+      
+      <div class="fld bignum" id="cashFld">
+        <label>Cash Tendered</label>
+        <input id="cashInput" type="number" min="0" placeholder="0" oninput="renderPay()">
+      </div>
+      
+      <div class="quick-cash" id="quickCash"></div>
+      <button class="btn btn-pay" id="confirmPay" style="width:100%" onclick="confirmPayment()">Complete Sale</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ RECEIPT MODAL ============ -->
+<div class="overlay" id="rcOverlay">
+  <div class="modal" style="max-width:380px;background:transparent;border:none;box-shadow:none;">
+    <div id="receipt"></div>
+  </div>
+</div>
+
+<!-- ============ ITEM EDIT MODAL ============ -->
+<div class="overlay" id="itemOverlay">
+  <div class="modal">
+    <div class="modal-head"><h3 id="itemTitle">Add Item</h3><button class="x" onclick="closeOverlay('itemOverlay')">×</button></div>
+    <div class="modal-body">
+      <div class="fld">
+        <label>Item Name</label>
+        <input id="fName" type="text" placeholder="e.g. Shoyu Tonkotsu Ramen">
+      </div>
+      <div style="display:flex;gap:12px;">
+        <div class="fld" style="flex:1;">
+          <label>Price (₱)</label>
+          <input id="fPrice" type="number" min="0" placeholder="0">
+        </div>
+        <div class="fld" style="flex:1;">
+          <label>Category</label>
+          <select id="fCat">
+            <option>Ramen &amp; Noodles</option>
+            <option>Sides</option>
+            <option>Coffee</option>
+            <option>Beverages</option>
+          </select>
+        </div>
+      </div>
+      <div class="fld">
+        <label>Note / Size (optional)</label>
+        <input id="fNote" type="text" placeholder="e.g. 130ml">
+      </div>
+      <div class="fld">
+        <label>Photo (optional — add later)</label>
+        <div class="img-pick">
+          <div class="prev" id="fPrev">🍜</div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+            <button class="btn-ghost" onclick="document.getElementById('fImg').click()">📷 Upload Photo</button>
+            <button class="btn-ghost" id="fRemove" onclick="removeImg()" style="display:none">Remove Photo</button>
+          </div>
+          <input id="fImg" type="file" accept="image/*" style="display:none" onchange="onImgPick(event)">
+        </div>
+      </div>
+      <div style="display:flex;gap:9px;margin-top:6px;">
+        <button class="btn-ghost" id="fDelete" onclick="deleteItem()" style="display:none;color:var(--red)">Delete</button>
+        <button class="btn btn-pay" style="flex:1" onclick="saveItem()">Save Item</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
