@@ -496,3 +496,5 @@ document.getElementById('fCat').addEventListener('change',e=>{ if(!pendingImg) u
 /* ---------- Init ---------- */
 initCashier();
 renderCats(); renderMenu(); renderCart(); onDiscChange();
+
+//force to redeploy
