@@ -2,7 +2,13 @@
    SABASU NOODLE BAR — POS  |  app.js
    Data layer = localStorage ("database")
    ============================================================ */
+
+   // 1. Initialize your Supabase Cloud Client Connection Bridge
+const SUPABASE_URL = 'https://vddvsbveybvnqrfydfjr.supabase.co/rest/v1/';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkZHZzYnZleWJ2bnFyZnlkZmpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NzI1NjAsImV4cCI6MjA5NjE0ODU2MH0.TX13Ptf-Zh_RKoAb0hyczqyvhAiQkYCnhh40Ir8P9i8';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const DB = {
+
   MENU:'sabasu_menu_v1',
   ORDERS:'sabasu_orders_v1',
   COUNTER:'sabasu_counter_v1',
@@ -280,6 +286,7 @@ function renderPay(){
   cp.style.opacity = cp.disabled?'.45':'1';
 }
 function confirmPayment(){
+  const orders=DB.get(DB.ORDERS,[]); orders.unshift(order); DB.set(DB.ORDERS,orders);
   const {subtotal,discount,label,total}=calc();
   const qrMethods = ['Gcash','Maya','qrph','visa'];
   const isQR = qrMethods.includes(payMethod);
