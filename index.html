@@ -118,12 +118,22 @@
     <div class="modal-body">
       <div class="pay-summary" id="paySummary"></div>
       <div class="pay-methods" id="payMethods">
-        <button class="active" data-m="Cash" onclick="setPayMethod('Cash')">💵 Cash</button>
-        <button data-m="GCash" onclick="setPayMethod('GCash')">📱 GCash</button>
-        <button data-m="Maya" onclick="setPayMethod('Maya')">📱 Maya</button>
-        <button data-m="QRph" onclick="setPayMethod('QRph')">🏦 QRph</button>
-        <button data-m="Visa" onclick="setPayMethod('Visa')">💳 Visa</button>
-      </div>
+  <button class="active" data-m="Cash" onclick="setPayMethod('Cash')">
+    💵 Cash
+  </button>
+  <button data-m="Gcash" onclick="setPayMethod('Gcash')">
+    <img src="Icon/icon-gcash.png" alt="GCash" class="pay-icon"> GCash
+  </button>
+  <button data-m="Maya" onclick="setPayMethod('Maya')">
+    <img src="Icon/icon-maya.jpg" alt="Maya" class="pay-icon"> Maya
+  </button>
+  <button data-m="qrph" onclick="setPayMethod('qrph')">
+    <img src="Icon/icon-qrph.png" alt="QRph" class="pay-icon"> QRph
+  </button>
+  <button data-m="visa" onclick="setPayMethod('visa')">
+    <img src="Icon/icon-visa.png" alt="Visa" class="pay-icon"> Visa
+  </button>
+</div>
 
       <!-- QR Code Display -->
       <div class="qr-display" id="qrDisplay">
