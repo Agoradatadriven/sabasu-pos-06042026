@@ -209,11 +209,11 @@ function setPayMethod(m){
   document.querySelectorAll('#payMethods button').forEach(b=>b.classList.toggle('active',b.dataset.m===m));
   
   // Clean, consolidated system mapping matching database keys exactly
-  const qrMethods = {
-    'Gcash': 'PNG/qr-gcash.png',
-    'Maya': 'PNG/qr-maya.png',
-    'qrph': 'PNG/qr-qrph.png',
-    'visa': 'PNG/qr-visa.png'
+ const qrMethods = {
+    'Gcash': 'Qr/qr-gcash.png',
+    'Maya': 'Qr/qr-maya.png',
+    'qrph': 'Qr/qr-qrph.png',
+    'visa': 'Qr/qr-visa.png'
   };
   
   const qrDisplay = document.getElementById('qrDisplay');
