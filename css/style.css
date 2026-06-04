@@ -295,3 +295,18 @@ main{flex:1;min-height:0;overflow:hidden;}
   #receipt{position:fixed;inset:0;margin:0;max-width:100%;box-shadow:none;border-radius:0;background:#fff;}
   .rc-actions{display:none !important;}
 }
+.pay-icon {
+  width: 20px;         /* Keeps icon small and neat */
+  height: 20px;        /* Keeps aspect ratio square */
+  object-fit: contain; /* Prevents image squishing */
+  vertical-align: middle; /* Aligns image with button text line */
+  margin-right: 8px;   /* Creates breathing room before the text */
+  border-radius: 4px;  /* Optional subtle rounding for image borders */
+}
+
+/* Fixes button layout to center text and icon together */
+.pay-methods button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}

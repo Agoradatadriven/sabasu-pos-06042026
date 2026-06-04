@@ -119,11 +119,21 @@
       <div class="pay-summary" id="paySummary"></div>
       
       <div class="pay-methods" id="payMethods">
-        <button class="active" data-m="Cash" onclick="setPayMethod('Cash')">💵 Cash</button>
-        <button data-m="Gcash" onclick="setPayMethod('Gcash')">📳 GCash</button>
-        <button data-m="Maya" onclick="setPayMethod('Maya')">💳 Maya</button>
-        <button data-m="qrph" onclick="setPayMethod('qrph')">📱 QRph</button>
-        <button data-m="visa" onclick="setPayMethod('visa')">💳 Visa</button>
+        <button class="active" data-m="Cash" onclick="setPayMethod('Cash')">
+          <img src="icon-cash.jpeg" alt="Cash" class="pay-icon"> Cash
+        </button>
+        <button data-m="Gcash" onclick="setPayMethod('Gcash')">
+          <img src="qr-gcash.png" alt="GCash" class="pay-icon"> GCash
+        </button>
+        <button data-m="Maya" onclick="setPayMethod('Maya')">
+          <img src="qr-maya.png" alt="Maya" class="pay-icon"> Maya
+        </button>
+        <button data-m="qrph" onclick="setPayMethod('qrph')">
+          <img src="qr-qrph.png" alt="QRph" class="pay-icon"> QRph
+        </button>
+        <button data-m="visa" onclick="setPayMethod('visa')">
+          <img src="qr-visa.png" alt="Visa" class="pay-icon"> Visa
+        </button>
       </div>
 
       <div id="qrContainer" style="display: none; text-align: center; margin: 15px 0; padding: 12px; border: 2px dashed #4a3f6b; border-radius: 8px; background: #1f1a2e;">
