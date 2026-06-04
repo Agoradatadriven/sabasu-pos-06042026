@@ -75,14 +75,22 @@ document.querySelectorAll('.topnav button').forEach(b=>{
   };
 });
 
-/* ---------- Clock ---------- */
-function tick(){
-  const d=new Date();
-  document.getElementById('clock').innerHTML =
-    d.toLocaleDateString('en-PH',{weekday:'short',month:'short',day:'numeric'})+'<br>'+
-    d.toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+/* ---------- Aesthetic Digital Clock ---------- */
+function tick() {
+    const d = new Date();
+    
+    // Format options matching your system locale
+    const dateStr = d.toLocaleDateString('en-PH', { weekday: 'short', month: 'short', day: 'numeric' });
+    const timeStr = d.toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+
+    // Inject separated divs for precise styling control
+    document.getElementById('clock').innerHTML = `
+        <div class="clock-time">${timeStr}</div>
+        <div class="clock-date">${dateStr}</div>
+    `;
 }
-setInterval(tick,1000); tick();
+setInterval(tick, 1000); 
+tick();
 
 /* ---------- Order number ---------- */
 function currentOrderNo(){ return DB.get(DB.COUNTER,0)+1; }
