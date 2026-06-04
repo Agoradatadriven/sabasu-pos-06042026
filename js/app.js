@@ -210,10 +210,10 @@ function setPayMethod(m){
   
   // Clean, consolidated system mapping matching database keys exactly
   const qrMethods = {
-    'Gcash': 'PNG/qr-gcash.png',
-    'Maya': 'PNG/qr-maya.png',
-    'qrph': 'PNG/qr-qrph.png',
-    'visa': 'PNG/qr-visa.png'
+    'Gcash': 'Qr/qr-gcash.png',
+    'Maya': 'Qr/qr-maya.png',
+    'qrph': 'Qr/qr-qrph.png',
+    'visa': 'Qr/qr-visa.png'
   };
   
   const qrDisplay = document.getElementById('qrDisplay');
@@ -343,7 +343,7 @@ function showReceipt(o, isNew){
       <div class="rc-foot">
         <div class="ty">ありがとう · Arigatō!</div>
         This serves as your official order receipt.<br>
-        SABASU Noodle Bar · See you again soon 🍜
+        SABASU Noodle Bar · See you again soon 
       </div>
     </div>
     <div class="rc-actions">
