@@ -1797,4 +1797,36 @@ main {
   .rc-actions {
     display: none !important;
   }
+  /* ---------- Menu Item Sorting Controls ---------- */
+.mcard-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.btn-sort {
+  font-size: 14px;
+  opacity: 0.4;
+  padding: 6px;
+  color: var(--ink);
+  transition: opacity 0.15s, color 0.15s;
+}
+
+.btn-sort:hover {
+  opacity: 1;
+  color: var(--primary);
+}
+
+.btn-sort:disabled {
+  opacity: 0.1 !important;
+  cursor: not-allowed;
+}
+
+/* Adjust the existing edit button to match the actions row package layout */
+.mcard .medit {
+  margin-left: 0 !important;
+  padding: 6px;
+}
 }

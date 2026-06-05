@@ -99,25 +99,25 @@ const CAT_GRAD = {
 };
 
 const DEFAULT_MENU = [
-  {id:'m1', name:'Shoyu Tonkotsu Ramen', price:130, cat:'Ramen & Noodles', note:''},
-  {id:'m2', name:'Zaru Soba Cold Noodles', price:160, cat:'Ramen & Noodles', note:''},
-  {id:'m3', name:'Jin Ramyeon', price:150, cat:'Ramen & Noodles', note:''},
-  {id:'m4', name:'Shin Ramyeon', price:150, cat:'Ramen & Noodles', note:''},
-  {id:'m5', name:'Buldak Carbonara', price:150, cat:'Pasta', note:''},
-  {id:'s1', name:'French Fries', price:70, cat:'Sides', note:''},
-  {id:'s2', name:'Beef Nachos', price:135, cat:'Sides', note:''},
-  {id:'c1', name:'Cafe Americano', price:70, cat:'Coffee', note:'130ml'},
-  {id:'c2', name:'Cafe Latte', price:90, cat:'Coffee', note:'130ml'},
-  {id:'c3', name:'Iced Honey Chia Refresher', price:75, cat:'Coffee', note:''},
-  {id:'b1', name:'Coca-Cola', price:55, cat:'Beverages', note:''},
-  {id:'b2', name:'Canada Dry', price:60, cat:'Beverages', note:''},
-  {id:'b3', name:'Dr. Pepper', price:60, cat:'Beverages', note:''},
-  {id:'b4', name:'Bottled Water', price:25, cat:'Beverages', note:''},
-  {id:'b5', name:'C2 Solo', price:25, cat:'Beverages', note:''},
-  {id:'b6', name:'Sparkling Water Maison Perrier', price:80, cat:'Beverages', note:''},
-  {id:'b7', name:'Iced Dark Cafe', price:70, cat:'Beverages', note:''},
-  {id:'b8', name:'Bundaberg', price:135, cat:'Beverages', note:''},
-  {id:'b9', name:'Starbucks Double Shot', price:120, cat:'Beverages', note:''}
+  {id:'m1', name:'Shoyu Tonkotsu Ramen', price:130, cat:'Ramen & Noodles', note:'', addons:[]},
+  {id:'m2', name:'Zaru Soba Cold Noodles', price:160, cat:'Ramen & Noodles', note:'', addons:[]},
+  {id:'m3', name:'Jin Ramyeon', price:150, cat:'Ramen & Noodles', note:'', addons:[]},
+  {id:'m4', name:'Shin Ramyeon', price:150, cat:'Ramen & Noodles', note:'', addons:[]},
+  {id:'m5', name:'Buldak Carbonara', price:150, cat:'Pasta', note:'', addons:[]},
+  {id:'s1', name:'French Fries', price:70, cat:'Sides', note:'', addons:[]},
+  {id:'s2', name:'Beef Nachos', price:135, cat:'Sides', note:'', addons:[]},
+  {id:'c1', name:'Cafe Americano', price:70, cat:'Coffee', note:'130ml', addons:[]},
+  {id:'c2', name:'Cafe Latte', price:90, cat:'Coffee', note:'130ml', addons:[]},
+  {id:'c3', name:'Iced Honey Chia Refresher', price:75, cat:'Coffee', note:'', addons:[]},
+  {id:'b1', name:'Coca-Cola', price:55, cat:'Beverages', note:'', addons:[]},
+  {id:'b2', name:'Canada Dry', price:60, cat:'Beverages', note:'', addons:[]},
+  {id:'b3', name:'Dr. Pepper', price:60, cat:'Beverages', note:'', addons:[]},
+  {id:'b4', name:'Bottled Water', price:25, cat:'Beverages', note:'', addons:[]},
+  {id:'b5', name:'C2 Solo', price:25, cat:'Beverages', note:'', addons:[]},
+  {id:'b6', name:'Sparkling Water Maison Perrier', price:80, cat:'Beverages', note:'', addons:[]},
+  {id:'b7', name:'Iced Dark Cafe', price:70, cat:'Beverages', note:'', addons:[]},
+  {id:'b8', name:'Bundaberg', price:135, cat:'Beverages', note:'', addons:[]},
+  {id:'b9', name:'Starbucks Double Shot', price:120, cat:'Beverages', note:'', addons:[]}
 ];
 
 let menu = DB.get(DB.MENU, null);
@@ -130,8 +130,9 @@ let payMethod = 'Cash';
 let editingId = null;
 let pendingImg = null;
 
-let currentCustomizeItem = null;
-let customQty = 1;
+// Kiosk intermediate item config states
+let currentAddonsList = []; 
+let activeKioskItem = null;  
 
 const peso = n => '₱'+Number(n).toLocaleString('en-PH',{minimumFractionDigits:0,maximumFractionDigits:2});
 
@@ -212,27 +213,96 @@ function renderMenu(){
   }).join('') || `<div class="empty">No items in this category</div>`;
 }
 
-/* ---------- Cart ---------- */
+/* ---------- Cart & Kiosk Customizer Custom Actions ---------- */
 function addToCart(id){
   const m = menu.find(x=>x.id===id); if(!m) return;
-  const line = cart.find(l=>l.id===id);
-  if(line) line.qty++;
-  else cart.push({id:m.id,name:m.name,price:m.price,qty:1,note:m.note});
+  
+  // If item contains active modifiers, launch kiosk selection menu route instead of standard skip flow
+  if(m.addons && m.addons.length > 0) {
+    launchKioskCustomizer(m);
+    return;
+  }
+  
+  executeCartInsertion(m, []);
+}
+
+function launchKioskCustomizer(item) {
+  activeKioskItem = item;
+  document.getElementById('kioskItemTitle').textContent = `Customize ${item.name}`;
+  
+  const grid = document.getElementById('kioskAddonsGrid');
+  if(grid) {
+    grid.innerHTML = item.addons.map((add, idx) => `
+      <div class="kiosk-addon-row" onclick="document.getElementById('kchk_${idx}').click(); event.stopPropagation();">
+        <div class="kiosk-addon-info">
+          <span class="kiosk-addon-name">${add.name}</span>
+          <span class="kiosk-addon-price">+ ${peso(add.price)}</span>
+        </div>
+        <input type="checkbox" id="kchk_${idx}" value="${idx}" onclick="event.stopPropagation();">
+      </div>
+    `).join('');
+  }
+  
+  const submitBtn = document.getElementById('kioskSubmitBtn');
+  if(submitBtn) {
+    submitBtn.onclick = () => {
+      const selected = [];
+      item.addons.forEach((add, idx) => {
+        const chk = document.getElementById(`kchk_${idx}`);
+        if(chk && chk.checked) {
+          selected.push({...add});
+        }
+      });
+      executeCartInsertion(item, selected);
+      closeOverlay('kioskOverlay');
+    };
+  }
+  
+  document.getElementById('kioskOverlay').classList.add('show');
+}
+
+function executeCartInsertion(item, selectedAddons) {
+  // Use a string signature to allow multiple versions of the same item with distinct add-on packages to co-exist
+  const addonsSignature = selectedAddons.map(a => a.name).sort().join('|');
+  const uniqueCartLineId = item.id + (addonsSignature ? '-' + addonsSignature : '');
+  
+  const line = cart.find(l => l.cartLineId === uniqueCartLineId);
+  if(line) {
+    line.qty++;
+  } else {
+    cart.push({
+      cartLineId: uniqueCartLineId,
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      qty: 1,
+      note: item.note,
+      selectedAddons: selectedAddons
+    });
+  }
   renderCart(); flash();
 }
-function changeQty(id,d){
-  const line=cart.find(l=>l.id===id); if(!line) return;
-  line.qty+=d; if(line.qty<=0) cart=cart.filter(l=>l.id!==id);
+
+function changeQty(cartLineId, d){
+  const line=cart.find(l=>l.cartLineId===cartLineId); if(!line) return;
+  line.qty+=d; if(line.qty<=0) cart=cart.filter(l=>l.cartLineId!==cartLineId);
   renderCart();
 }
+
 function clearCart(){ if(!cart.length) return; cart=[]; document.getElementById('discType').value='none'; onDiscChange(); renderCart(); }
+
 function setType(t){
   orderType=t;
   document.getElementById('btnDine').classList.toggle('active',t==='Dine In');
   document.getElementById('btnTake').classList.toggle('active',t==='Take Out');
 }
+
 function calc(){
-  const subtotal = cart.reduce((s,l)=>s+l.price*l.qty,0);
+  const subtotal = cart.reduce((s,l) => {
+    const addonsCost = l.selectedAddons ? l.selectedAddons.reduce((sum, a) => sum + a.price, 0) : 0;
+    return s + (l.price + addonsCost) * l.qty;
+  }, 0);
+  
   const dt=document.getElementById('discType').value;
   const dv=parseFloat(document.getElementById('discVal').value)||0;
   let discount=0, label='';
@@ -243,6 +313,7 @@ function calc(){
   discount=Math.min(discount,subtotal);
   return {subtotal, discount, label, total:subtotal-discount};
 }
+
 function onDiscChange(){
   const dt=document.getElementById('discType').value;
   const inp=document.getElementById('discVal');
@@ -253,26 +324,40 @@ function onDiscChange(){
   }
   renderTotals();
 }
+
 function renderCart(){
   const box=document.getElementById('cartItems');
   if(!box) return;
   if(!cart.length){
     box.innerHTML=`<div class="empty">No items yet. Tap a dish to start.</div>`;
   }else{
-    box.innerHTML=cart.map(l=>`
+    box.innerHTML=cart.map(l=>{
+      const addonsCost = l.selectedAddons ? l.selectedAddons.reduce((sum, a) => sum + a.price, 0) : 0;
+      const totalLinePrice = l.price + addonsCost;
+      const addonsLabel = l.selectedAddons && l.selectedAddons.length > 0 
+        ? `<span class="cart-addon-inline">Extras: ${l.selectedAddons.map(a => `+${a.name}`).join(', ')}</span>`
+        : '';
+        
+      return `
       <div class="line">
-        <div class="info"><div class="ln">${l.name}</div><div class="lp">${peso(l.price)} each</div></div>
-        <div class="qty">
-          <button onclick="changeQty('${l.id}',-1)">−</button>
-          <span>${l.qty}</span>
-          <button onclick="changeQty('${l.id}',1)">＋</button>
+        <div class="info">
+          <div class="ln">${l.name}</div>
+          <div class="lp">${peso(totalLinePrice)} each</div>
+          ${addonsLabel}
         </div>
-        <div class="sub">${peso(l.price*l.qty)}</div>
-      </div>`).join('');
+        <div class="qty">
+          <button onclick="changeQty('${l.cartLineId}',-1)">−</button>
+          <span>${l.qty}</span>
+          <button onclick="changeQty('${l.cartLineId}',1)">＋</button>
+        </div>
+        <div class="sub">${peso(totalLinePrice*l.qty)}</div>
+      </div>`;
+    }).join('');
   }
   document.getElementById('ordNo').textContent=fmtNo(currentOrderNo());
   renderTotals();
 }
+
 function renderTotals(){
   const {subtotal,discount,label,total}=calc();
   let html=`<div class="t"><span>Subtotal (${cart.reduce((s,l)=>s+l.qty,0)} items)</span><span>${peso(subtotal)}</span></div>`;
@@ -291,6 +376,7 @@ function renderTotals(){
   if(mb){ mb.textContent=cart.reduce((s,l)=>s+l.qty,0)+' · '+peso(total);
     document.getElementById('mobCartBtn').style.display=cart.length?'flex':'none'; }
 }
+
 function flash(){
   const mb=document.getElementById('mobCartBtn');
   if(window.innerWidth<=920 && mb){ mb.style.display='flex'; }
@@ -385,9 +471,26 @@ function confirmPayment(){
   }
   
   const no=currentOrderNo();
+  
+  // Format items nicely to append modifiers directly on your receipt records logs
+  const orderItemsMapped = cart.map(l => {
+    const addonsCost = l.selectedAddons ? l.selectedAddons.reduce((sum, a) => sum + a.price, 0) : 0;
+    const linePrice = l.price + addonsCost;
+    const modifiersText = l.selectedAddons && l.selectedAddons.length > 0 
+      ? ` (${l.selectedAddons.map(a => a.name).join(', ')})` 
+      : '';
+      
+    return {
+      name: l.name + modifiersText,
+      price: linePrice,
+      qty: l.qty,
+      note: l.note
+    };
+  });
+
   const order={
     no, ts:Date.now(),
-    items:cart.map(l=>({name:l.name,price:l.price,qty:l.qty,note:l.note})),
+    items: orderItemsMapped,
     subtotal, discount, discLabel:label, total,
     type:orderType, method:payMethod,
     cashier: getCashier(),
@@ -581,17 +684,75 @@ function moveItemInMenu(currentIndex, direction) {
 function openItemEdit(id){
   editingId=id; pendingImg=null;
   const m = id?menu.find(x=>x.id===id):null;
+  
+  // Initialize intermediate modular modifier list configuration arrays
+  currentAddonsList = m && m.addons ? [...m.addons] : [];
+  
   document.getElementById('itemTitle').textContent=m?'Edit Item':'Add Item';
   document.getElementById('fName').value=m?m.name:'';
   document.getElementById('fPrice').value=m?m.price:'';
   document.getElementById('fCat').value=m?m.cat:'Ramen & Noodles';
   document.getElementById('fNote').value=m?m.note||'':'';
   pendingImg = m?m.img||null:null;
+  
+  // Lazily inject modifiers panel shell wrapper context into the management modal view on the fly
+  let addonsSection = document.getElementById('modalAddonsSection');
+  if(!addonsSection) {
+     addonsSection = document.createElement('div');
+     addonsSection.id = 'modalAddonsSection';
+     addonsSection.className = 'addons-manager-section';
+     const parentForm = document.getElementById('fName').parentElement.parentElement;
+     const photoLabel = document.querySelector('.popup-body label[for="fImg"]') || document.getElementById('fImg').parentElement;
+     parentForm.insertBefore(addonsSection, photoLabel);
+  }
+  
+  renderModalAddonsManager();
   updatePrev(m?m.cat:'Ramen & Noodles');
   document.getElementById('fDelete').style.display=m?'block':'none';
   document.getElementById('fImg').value='';
   document.getElementById('itemOverlay').classList.add('show');
 }
+
+function renderModalAddonsManager() {
+  const container = document.getElementById('modalAddonsSection');
+  if(!container) return;
+  
+  container.innerHTML = `
+    <div class="addons-label">Configure Item Add-ons / Modifiers</div>
+    <div class="addons-input-row">
+      <input type="text" id="newAddonName" placeholder="e.g. Extra Egg" style="flex: 2; padding:8px; border:1px solid #e1dbd6; border-radius:6px;">
+      <input type="number" id="newAddonPrice" placeholder="₱ Price" style="flex: 1; padding:8px; border:1px solid #e1dbd6; border-radius:6px;">
+      <button type="button" class="btn-add-addon" onclick="addNewAddonTag()" style="background:#16121f; color:white; border:none; padding:0 12px; border-radius:6px; font-weight:700; cursor:pointer;">+ Add</button>
+    </div>
+    <div class="addons-list-tags" id="addonsTagsList" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;">
+      ${currentAddonsList.map((add, idx) => `
+        <span class="addon-tag" style="display:inline-flex; align-items:center; background:#f3efeb; padding:4px 8px; border-radius:6px; font-size:12px; font-weight:500;">
+          ${add.name} (+₱${add.price})
+          <button type="button" class="remove-btn" onclick="removeAddonTag(${idx})" style="background:none; border:none; color:#e23b32; margin-left:6px; cursor:pointer; font-weight:900;">✕</button>
+        </span>
+      `).join('') || '<span style="color:#a59a90; font-size:13px;">No active add-ons assigned yet.</span>'}
+    </div>
+  `;
+}
+
+function addNewAddonTag() {
+  const nameInp = document.getElementById('newAddonName');
+  const priceInp = document.getElementById('newAddonPrice');
+  const name = nameInp.value.trim();
+  const price = parseFloat(priceInp.value) || 0;
+  
+  if(!name) { toast('Enter modifier name'); return; }
+  currentAddonsList.push({ name, price });
+  nameInp.value = '';
+  priceInp.value = '';
+  renderModalAddonsManager();
+}
+
+function removeAddonTag(idx) {
+  currentAddonsList.splice(idx, 1);
+  renderModalAddonsManager();
+}
+
 function updatePrev(cat){
   const p=document.getElementById('fPrev');
   if(pendingImg){ p.innerHTML=`<img src="${pendingImg}">`; document.getElementById('fRemove').style.display='block'; }
@@ -615,6 +776,7 @@ function onImgPick(e){
   r.readAsDataURL(f);
 }
 function removeImg(){ pendingImg=null; updatePrev(document.getElementById('fCat').value); }
+
 function saveItem(){
   const name=document.getElementById('fName').value.trim();
   const price=parseFloat(document.getElementById('fPrice').value);
@@ -624,9 +786,9 @@ function saveItem(){
   if(isNaN(price)||price<0){ toast('Enter a valid price'); return; }
   if(editingId){
     const m=menu.find(x=>x.id===editingId);
-    Object.assign(m,{name,price,cat,note,img:pendingImg||null});
+    Object.assign(m,{name,price,cat,note,img:pendingImg||null, addons: currentAddonsList});
   }else{
-    menu.push({id:'x'+Date.now(),name,price,cat,note,img:pendingImg||null});
+    menu.push({id:'x'+Date.now(),name,price,cat,note,img:pendingImg||null, addons: currentAddonsList});
   }
   DB.set(DB.MENU,menu);
   closeOverlay('itemOverlay'); renderManager(); renderMenu(); toast('Item saved ✓');
