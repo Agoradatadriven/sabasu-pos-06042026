@@ -74,54 +74,66 @@ async function handleSignOut() {
 }
 
 const DB = {
-  MENU:'sabasu_menu_v1',
-  ORDERS:'sabasu_orders_v1',
-  COUNTER:'sabasu_counter_v1',
-  CASHIER:'sabasu_cashier_v1',
-  get(k,f){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):f; }catch(e){ return f; } },
-  set(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
+  MENU: 'sabasu_menu_v1',
+  ORDERS: 'sabasu_orders_v1',
+  COUNTER: 'sabasu_counter_v1',
+  CASHIER: 'sabasu_cashier_v1',
+  get(k, f) { 
+    try { 
+      const v = localStorage.getItem(k); 
+      return v ? JSON.parse(v) : f; 
+    } catch(e) { 
+      return f; 
+    } 
+  },
+  set(k, v) { 
+    localStorage.setItem(k, JSON.stringify(v)); 
+  }
 };
 
 const CAT_EMOJI = {
-  'Ramen & Noodles':'',
-  'Pasta':'',
-  'Sides':'',
-  'Coffee':'',
-  'Beverages':''
+  'Ramen & Noodles': '',
+  'Pasta': '',
+  'Sides': '',
+  'Coffee': '',
+  'Beverages': ''
 };
 
 const CAT_GRAD = {
-  'Ramen & Noodles':'linear-gradient(145deg,#e23b32,#7a1c16)',
-  'Pasta':'linear-gradient(145deg,#d35400,#8e2a00)',
-  'Sides':'linear-gradient(145deg,#e8b04b,#9c6e1e)',
-  'Coffee':'linear-gradient(145deg,#8a5a32,#4a2f19)',
-  'Beverages':'linear-gradient(145deg,#3fae6f,#1f5e3b)'
+  'Ramen & Noodles': 'linear-gradient(145deg,#e23b32,#7a1c16)',
+  'Pasta': 'linear-gradient(145deg,#d35400,#8e2a00)',
+  'Sides': 'linear-gradient(145deg,#e8b04b,#9c6e1e)',
+  'Coffee': 'linear-gradient(145deg,#8a5a32,#4a2f19)',
+  'Beverages': 'linear-gradient(145deg,#3fae6f,#1f5e3b)'
 };
 
 const DEFAULT_MENU = [
-  {id:'m1', name:'Shoyu Tonkotsu Ramen', price:130, cat:'Ramen & Noodles', note:'', addons:[]},
-  {id:'m2', name:'Zaru Soba Cold Noodles', price:160, cat:'Ramen & Noodles', note:'', addons:[]},
-  {id:'m3', name:'Jin Ramyeon', price:150, cat:'Ramen & Noodles', note:'', addons:[]},
-  {id:'m4', name:'Shin Ramyeon', price:150, cat:'Ramen & Noodles', note:'', addons:[]},
-  {id:'m5', name:'Buldak Carbonara', price:150, cat:'Pasta', note:'', addons:[]},
-  {id:'s1', name:'French Fries', price:70, cat:'Sides', note:'', addons:[]},
-  {id:'s2', name:'Beef Nachos', price:135, cat:'Sides', note:'', addons:[]},
-  {id:'c1', name:'Cafe Americano', price:70, cat:'Coffee', note:'130ml', addons:[]},
-  {id:'c2', name:'Cafe Latte', price:90, cat:'Coffee', note:'130ml', addons:[]},
-  {id:'c3', name:'Iced Honey Chia Refresher', price:75, cat:'Coffee', note:'', addons:[]},
-  {id:'b1', name:'Coca-Cola', price:55, cat:'Beverages', note:'', addons:[]},
-  {id:'b2', name:'Canada Dry', price:60, cat:'Beverages', note:'', addons:[]},
-  {id:'b3', name:'Dr. Pepper', price:60, cat:'Beverages', note:'', addons:[]},
-  {id:'b4', name:'Bottled Water', price:25, cat:'Beverages', note:'', addons:[]},
-  {id:'b5', name:'C2 Solo', price:25, cat:'Beverages', note:'', addons:[]},
-  {id:'b6', name:'Sparkling Water Maison Perrier', price:80, cat:'Beverages', note:'', addons:[]},
-  {id:'b7', name:'Iced Dark Cafe', price:70, cat:'Beverages', note:'', addons:[]},
-  {id:'b8', name:'Bundaberg', price:135, cat:'Beverages', note:'', addons:[]},
-  {id:'b9', name:'Starbucks Double Shot', price:120, cat:'Beverages', note:'', addons:[]}
+  {id: 'm1', name: 'Shoyu Tonkotsu Ramen', price: 130, cat: 'Ramen & Noodles', note: '', addons: []},
+  {id: 'm2', name: 'Zaru Soba Cold Noodles', price: 160, cat: 'Ramen & Noodles', note: '', addons: []},
+  {id: 'm3', name: 'Jin Ramyeon', price: 150, cat: 'Ramen & Noodles', note: '', addons: []},
+  {id: 'm4', name: 'Shin Ramyeon', price: 150, cat: 'Ramen & Noodles', note: '', addons: []},
+  {id: 'm5', name: 'Buldak Carbonara', price: 150, cat: 'Pasta', note: '', addons: []},
+  {id: 's1', name: 'French Fries', price: 70, cat: 'Sides', note: '', addons: []},
+  {id: 's2', name: 'Beef Nachos', price: 135, cat: 'Sides', note: '', addons: []},
+  {id: 'c1', name: 'Cafe Americano', price: 70, cat: 'Coffee', note: '130ml', addons: []},
+  {id: 'c2', name: 'Cafe Latte', price: 90, cat: 'Coffee', note: '130ml', addons: []},
+  {id: 'c3', name: 'Iced Honey Chia Refresher', price: 75, cat: 'Coffee', note: '', addons: []},
+  {id: 'b1', name: 'Coca-Cola', price: 55, cat: 'Beverages', note: '', addons: []},
+  {id: 'b2', name: 'Canada Dry', price: 60, cat: 'Beverages', note: '', addons: []},
+  {id: 'b3', name: 'Dr. Pepper', price: 60, cat: 'Beverages', note: '', addons: []},
+  {id: 'b4', name: 'Bottled Water', price: 25, cat: 'Beverages', note: '', addons: []},
+  {id: 'b5', name: 'C2 Solo', price: 25, cat: 'Beverages', note: '', addons: []},
+  {id: 'b6', name: 'Sparkling Water Maison Perrier', price: 80, cat: 'Beverages', note: '', addons: []},
+  {id: 'b7', name: 'Iced Dark Cafe', price: 70, cat: 'Beverages', note: '', addons: []},
+  {id: 'b8', name: 'Bundaberg', price: 135, cat: 'Beverages', note: '', addons: []},
+  {id: 'b9', name: 'Starbucks Double Shot', price: 120, cat: 'Beverages', note: '', addons: []}
 ];
 
 let menu = DB.get(DB.MENU, null);
-if(!menu){ menu = DEFAULT_MENU.map(x=>({...x})); DB.set(DB.MENU, menu); }
+if (!menu) { 
+  menu = DEFAULT_MENU.map(x => ({...x})); 
+  DB.set(DB.MENU, menu); 
+}
 
 let cart = [];
 let activeCat = 'Ramen & Noodles';
@@ -130,95 +142,102 @@ let payMethod = 'Cash';
 let editingId = null;
 let pendingImg = null;
 
-// Kiosk intermediate item config states
+// Kiosk intermediate item configuration caches
 let currentAddonsList = []; 
 let activeKioskItem = null;  
 
-const peso = n => '₱'+Number(n).toLocaleString('en-PH',{minimumFractionDigits:0,maximumFractionDigits:2});
+const peso = n => '₱' + Number(n).toLocaleString('en-PH', {minimumFractionDigits: 0, maximumFractionDigits: 2});
 
-/* ---------- Cashier name (editable + persistent) ---------- */
-function getCashier(){
+/* ---------- Cashier Name (Editable + Persistent) ---------- */
+function getCashier() {
   const c = DB.get(DB.CASHIER, '');
   return (c && c.trim()) ? c.trim() : 'Cashier';
 }
-function initCashier(){
+
+function initCashier() {
   const inp = document.getElementById('cashierName');
-  if(inp) {
+  if (inp) {
     inp.value = DB.get(DB.CASHIER, '') || '';
-    inp.addEventListener('input', e=>{ DB.set(DB.CASHIER, e.target.value); });
+    inp.addEventListener('input', e => { DB.set(DB.CASHIER, e.target.value); });
   }
 }
 
-/* ---------- Navigation ---------- */
-document.querySelectorAll('.topnav button').forEach(b=>{
-  b.onclick=()=>{
-    document.querySelectorAll('.topnav button').forEach(x=>x.classList.remove('active'));
+/* ---------- Navigation Menu Handling ---------- */
+document.querySelectorAll('.topnav button').forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll('.topnav button').forEach(x => x.classList.remove('active'));
     b.classList.add('active');
-    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-    document.getElementById('view-'+b.dataset.view).classList.add('active');
-    if(b.dataset.view==='hist') renderHistory();
-    if(b.dataset.view==='mgr') renderManager();
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + b.dataset.view).classList.add('active');
+    if (b.dataset.view === 'hist') renderHistory();
+    if (b.dataset.view === 'mgr') renderManager();
   };
 });
 
-/* ---------- Aesthetic Digital Clock ---------- */
+/* ---------- Aesthetic Digital Clock System ---------- */
 function tick() {
-    const d = new Date();
-    const dateStr = d.toLocaleDateString('en-PH', { weekday: 'short', month: 'short', day: 'numeric' });
-    const timeStr = d.toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+  const d = new Date();
+  const dateStr = d.toLocaleDateString('en-PH', { weekday: 'short', month: 'short', day: 'numeric' });
+  const timeStr = d.toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
 
-    const clockEl = document.getElementById('clock');
-    if(clockEl) {
-      clockEl.innerHTML = `
-          <div class="clock-time">${timeStr}</div>
-          <div class="clock-date">${dateStr}</div>
-      `;
-    }
+  const clockEl = document.getElementById('clock');
+  if (clockEl) {
+    clockEl.innerHTML = `
+      <div class="clock-time">${timeStr}</div>
+      <div class="clock-date">${dateStr}</div>
+    `;
+  }
 }
 setInterval(tick, 1000); 
 tick();
 
-/* ---------- Order number ---------- */
-function currentOrderNo(){ return DB.get(DB.COUNTER,0)+1; }
-function fmtNo(n){ return '#'+String(n).padStart(3,'0'); }
+/* ---------- Order Tracking Numbers ---------- */
+function currentOrderNo() { return DB.get(DB.COUNTER, 0) + 1; }
+function fmtNo(n) { return '#' + String(n).padStart(3, '0'); }
 
-/* ---------- Render Left Sidebar Categories Panel ---------- */
-function renderCats(){
+/* ---------- Left Sidebar Categories Panel ---------- */
+function renderCats() {
   const cats = Object.keys(CAT_EMOJI);
   const catsBox = document.getElementById('cats');
-  if(!catsBox) return;
+  if (!catsBox) return;
 
-  catsBox.innerHTML = cats.map(c=>
-    `<button class="cat ${c===activeCat?'active':''}" onclick="setCat('${c.replace(/'/g,"\\'")}')">${c}</button>`
+  catsBox.innerHTML = cats.map(c =>
+    `<button class="cat ${c === activeCat ? 'active' : ''}" onclick="setCat('${c.replace(/'/g, "\\'")}')">${c}</button>`
   ).join('');
 }
-function setCat(c){ activeCat=c; renderCats(); renderMenu(); }
 
-function renderMenu(){
+function setCat(c) { 
+  activeCat = c; 
+  renderCats(); 
+  renderMenu(); 
+}
+
+function renderMenu() {
   const gridEl = document.getElementById('menuGrid');
-  if(!gridEl) return;
-  const items = menu.filter(m=>m.cat===activeCat);
+  if (!gridEl) return;
+  const items = menu.filter(m => m.cat === activeCat);
   
-  gridEl.innerHTML = items.map(m=>{
+  gridEl.innerHTML = items.map(m => {
     const thumb = m.img ? `<img src="${m.img}" alt="">` : `<span></span>`;
-    const bg = m.img ? '' : `style="background:${CAT_GRAD[m.cat]||'#333'}"`;
+    const bg = m.img ? '' : `style="background:${CAT_GRAD[m.cat] || '#333'}"`;
     return `<button class="card" onclick="addToCart('${m.id}')">
       <div class="thumb" ${bg}>${thumb}<span class="plus">＋</span></div>
       <div class="body">
         <div class="nm">${m.name}</div>
-        ${m.note?`<div class="note">${m.note}</div>`:''}
+        ${m.note ? `<div class="note">${m.note}</div>` : ''}
         <div class="pr">${peso(m.price)}</div>
       </div>
     </button>`;
   }).join('') || `<div class="empty">No items in this category</div>`;
 }
 
-/* ---------- Cart & Kiosk Customizer Custom Actions ---------- */
-function addToCart(id){
-  const m = menu.find(x=>x.id===id); if(!m) return;
+/* ---------- Cart & Kiosk Modifier Framework Actions ---------- */
+function addToCart(id) {
+  const m = menu.find(x => x.id === id); 
+  if (!m) return;
   
-  // If item contains active modifiers, launch kiosk selection menu route instead of standard skip flow
-  if(m.addons && m.addons.length > 0) {
+  // Intercept normal checkout stream if customization options exist
+  if (m.addons && m.addons.length > 0) {
     launchKioskCustomizer(m);
     return;
   }
@@ -231,9 +250,9 @@ function launchKioskCustomizer(item) {
   document.getElementById('kioskItemTitle').textContent = `Customize ${item.name}`;
   
   const grid = document.getElementById('kioskAddonsGrid');
-  if(grid) {
+  if (grid) {
     grid.innerHTML = item.addons.map((add, idx) => `
-      <div class="kiosk-addon-row" onclick="document.getElementById('kchk_${idx}').click(); event.stopPropagation();">
+      <div class="kiosk-addon-row" onclick="const chk = document.getElementById('kchk_${idx}'); chk.checked = !chk.checked; event.stopPropagation();">
         <div class="kiosk-addon-info">
           <span class="kiosk-addon-name">${add.name}</span>
           <span class="kiosk-addon-price">+ ${peso(add.price)}</span>
@@ -244,12 +263,12 @@ function launchKioskCustomizer(item) {
   }
   
   const submitBtn = document.getElementById('kioskSubmitBtn');
-  if(submitBtn) {
+  if (submitBtn) {
     submitBtn.onclick = () => {
       const selected = [];
       item.addons.forEach((add, idx) => {
         const chk = document.getElementById(`kchk_${idx}`);
-        if(chk && chk.checked) {
+        if (chk && chk.checked) {
           selected.push({...add});
         }
       });
@@ -262,12 +281,12 @@ function launchKioskCustomizer(item) {
 }
 
 function executeCartInsertion(item, selectedAddons) {
-  // Use a string signature to allow multiple versions of the same item with distinct add-on packages to co-exist
+  // Composite signature string prevents non-identical modifier lines from grouping together
   const addonsSignature = selectedAddons.map(a => a.name).sort().join('|');
   const uniqueCartLineId = item.id + (addonsSignature ? '-' + addonsSignature : '');
   
   const line = cart.find(l => l.cartLineId === uniqueCartLineId);
-  if(line) {
+  if (line) {
     line.qty++;
   } else {
     cart.push({
@@ -280,58 +299,73 @@ function executeCartInsertion(item, selectedAddons) {
       selectedAddons: selectedAddons
     });
   }
-  renderCart(); flash();
+  renderCart(); 
+  flash();
 }
 
-function changeQty(cartLineId, d){
-  const line=cart.find(l=>l.cartLineId===cartLineId); if(!line) return;
-  line.qty+=d; if(line.qty<=0) cart=cart.filter(l=>l.cartLineId!==cartLineId);
+function changeQty(cartLineId, d) {
+  const line = cart.find(l => l.cartLineId === cartLineId); 
+  if (!line) return;
+  
+  line.qty += d; 
+  if (line.qty <= 0) {
+    cart = cart.filter(l => l.cartLineId !== cartLineId);
+  }
   renderCart();
 }
 
-function clearCart(){ if(!cart.length) return; cart=[]; document.getElementById('discType').value='none'; onDiscChange(); renderCart(); }
-
-function setType(t){
-  orderType=t;
-  document.getElementById('btnDine').classList.toggle('active',t==='Dine In');
-  document.getElementById('btnTake').classList.toggle('active',t==='Take Out');
+function clearCart() { 
+  if (!cart.length) return; 
+  cart = []; 
+  document.getElementById('discType').value = 'none'; 
+  onDiscChange(); 
+  renderCart(); 
 }
 
-function calc(){
-  const subtotal = cart.reduce((s,l) => {
+function setType(t) {
+  orderType = t;
+  document.getElementById('btnDine').classList.toggle('active', t === 'Dine In');
+  document.getElementById('btnTake').classList.toggle('active', t === 'Take Out');
+}
+
+function calc() {
+  const subtotal = cart.reduce((s, l) => {
     const addonsCost = l.selectedAddons ? l.selectedAddons.reduce((sum, a) => sum + a.price, 0) : 0;
     return s + (l.price + addonsCost) * l.qty;
   }, 0);
   
-  const dt=document.getElementById('discType').value;
-  const dv=parseFloat(document.getElementById('discVal').value)||0;
-  let discount=0, label='';
-  if(dt==='senior'){ discount=subtotal*0.20; label='Senior Citizen 20%'; }
-  else if(dt==='pwd'){ discount=subtotal*0.20; label='PWD 20%'; }
-  else if(dt==='pct'){ discount=subtotal*(dv/100); label='Discount '+dv+'%'; }
-  else if(dt==='amt'){ discount=dv; label='Discount'; }
-  discount=Math.min(discount,subtotal);
-  return {subtotal, discount, label, total:subtotal-discount};
+  const dt = document.getElementById('discType').value;
+  const dv = parseFloat(document.getElementById('discVal').value) || 0;
+  let discount = 0, label = '';
+  
+  if (dt === 'senior') { discount = subtotal * 0.20; label = 'Senior Citizen 20%'; }
+  else if (dt === 'pwd') { discount = subtotal * 0.20; label = 'PWD 20%'; }
+  else if (dt === 'pct') { discount = subtotal * (dv / 100); label = 'Discount ' + dv + '%'; }
+  else if (dt === 'amt') { discount = dv; label = 'Discount'; }
+  
+  discount = Math.min(discount, subtotal);
+  return { subtotal, discount, label, total: subtotal - discount };
 }
 
-function onDiscChange(){
-  const dt=document.getElementById('discType').value;
-  const inp=document.getElementById('discVal');
-  if(inp) {
-    inp.style.display=(dt==='pct'||dt==='amt')?'block':'none';
-    if(dt!=='pct'&&dt!=='amt') inp.value='';
-    inp.placeholder = dt==='pct'?'%':'₱';
+function onDiscChange() {
+  const dt = document.getElementById('discType').value;
+  const inp = document.getElementById('discVal');
+  if (inp) {
+    inp.style.display = (dt === 'pct' || dt === 'amt') ? 'block' : 'none';
+    if (dt !== 'pct' && dt !== 'amt') inp.value = '';
+    inp.placeholder = dt === 'pct' ? '%' : '₱';
   }
   renderTotals();
 }
 
-function renderCart(){
-  const box=document.getElementById('cartItems');
-  if(!box) return;
-  if(!cart.length){
-    box.innerHTML=`<div class="empty">No items yet. Tap a dish to start.</div>`;
-  }else{
-    box.innerHTML=cart.map(l=>{
+function renderCart() {
+  const box = document.getElementById('cartItems');
+  if (!box) return;
+  
+  if (!cart.length) {
+    box.innerHTML = `<div class="empty">No items yet. Tap a dish to start.</div>`;
+  } else {
+    box.innerHTML = cart.map(l => {
       const addonsCost = l.selectedAddons ? l.selectedAddons.reduce((sum, a) => sum + a.price, 0) : 0;
       const totalLinePrice = l.price + addonsCost;
       const addonsLabel = l.selectedAddons && l.selectedAddons.length > 0 
@@ -354,40 +388,42 @@ function renderCart(){
       </div>`;
     }).join('');
   }
-  document.getElementById('ordNo').textContent=fmtNo(currentOrderNo());
+  document.getElementById('ordNo').textContent = fmtNo(currentOrderNo());
   renderTotals();
 }
 
-function renderTotals(){
-  const {subtotal,discount,label,total}=calc();
-  let html=`<div class="t"><span>Subtotal (${cart.reduce((s,l)=>s+l.qty,0)} items)</span><span>${peso(subtotal)}</span></div>`;
-  if(discount>0) html+=`<div class="t disc"><span>${label}</span><span>−${peso(discount)}</span></div>`;
-  html+=`<div class="grand"><span class="lbl">TOTAL</span><span class="amt">${peso(total)}</span></div>`;
+function renderTotals() {
+  const { subtotal, discount, label, total } = calc();
+  let html = `<div class="t"><span>Subtotal (${cart.reduce((s,l)=>s+l.qty,0)} items)</span><span>${peso(subtotal)}</span></div>`;
+  if (discount > 0) html += `<div class="t disc"><span>${label}</span><span>−${peso(discount)}</span></div>`;
+  html += `<div class="grand"><span class="lbl">TOTAL</span><span class="amt">${peso(total)}</span></div>`;
   
   const totalsBox = document.getElementById('totals');
-  if(totalsBox) totalsBox.innerHTML=html;
+  if (totalsBox) totalsBox.innerHTML = html;
   
-  const btn=document.getElementById('payBtn');
-  if(btn) {
-    btn.disabled=!cart.length;
-    btn.textContent='Charge '+peso(total);
+  const btn = document.getElementById('payBtn');
+  if (btn) {
+    btn.disabled = !cart.length;
+    btn.textContent = 'Charge ' + peso(total);
   }
-  const mb=document.getElementById('mobBadge');
-  if(mb){ mb.textContent=cart.reduce((s,l)=>s+l.qty,0)+' · '+peso(total);
-    document.getElementById('mobCartBtn').style.display=cart.length?'flex':'none'; }
+  const mb = document.getElementById('mobBadge');
+  if (mb) { 
+    mb.textContent = cart.reduce((s,l)=>s+l.qty,0) + ' · ' + peso(total);
+    document.getElementById('mobCartBtn').style.display = cart.length ? 'flex' : 'none'; 
+  }
 }
 
-function flash(){
-  const mb=document.getElementById('mobCartBtn');
-  if(window.innerWidth<=920 && mb){ mb.style.display='flex'; }
+function flash() {
+  const mb = document.getElementById('mobCartBtn');
+  if (window.innerWidth <= 920 && mb) { mb.style.display = 'flex'; }
 }
-function openCart(){ document.getElementById('cart').classList.add('open'); }
-function closeCart(){ document.getElementById('cart').classList.remove('open'); }
+function openCart() { document.getElementById('cart').classList.add('open'); }
+function closeCart() { document.getElementById('cart').classList.remove('open'); }
 
-/* ---------- Payment ---------- */
-function setPayMethod(m){
-  payMethod=m;
-  document.querySelectorAll('#payMethods button').forEach(b=>b.classList.toggle('active',b.dataset.m===m));
+/* ---------- Checkout Ledger & QR Drawers ---------- */
+function setPayMethod(m) {
+  payMethod = m;
+  document.querySelectorAll('#payMethods button').forEach(b => b.classList.toggle('active', b.dataset.m === m));
   
   const qrMethods = {
     'Gcash': 'Qr/qr-gcash.png',
@@ -397,80 +433,89 @@ function setPayMethod(m){
   };
   
   const qrDisplay = document.getElementById('qrDisplay');
-  if(qrMethods[m]){
+  if (qrMethods[m]) {
     const labels = {'Gcash':'GCash Payment','Maya':'Maya Payment','qrph':'QRph Payment','visa':'Visa Payment'};
     document.getElementById('qrLabel').textContent = labels[m];
     document.getElementById('qrImage').src = qrMethods[m];
-    if(qrDisplay) qrDisplay.classList.add('show');
+    if (qrDisplay) qrDisplay.classList.add('show');
     document.getElementById('cashFld').style.display = 'none';
     document.getElementById('quickCash').style.display = 'none';
-  }else{
-    if(qrDisplay) qrDisplay.classList.remove('show');
+  } else {
+    if (qrDisplay) qrDisplay.classList.remove('show');
     document.getElementById('cashFld').style.display = 'block';
     document.getElementById('quickCash').style.display = 'flex';
   }
   renderPay();
 }
-function openPay(){
-  if(!cart.length) return;
-  payMethod='Cash'; setPayMethod('Cash');
-  document.getElementById('cashInput').value='';
-  document.getElementById('payCashier').value = DB.get(DB.CASHIER,'') || '';
-  const {total}=calc();
-  const opts=[total, Math.ceil(total/50)*50, Math.ceil(total/100)*100, Math.ceil(total/500)*500, 1000];
-  const uniq=[...new Set(opts.filter(v=>v>=total))].slice(0,5);
-  document.getElementById('quickCash').innerHTML = uniq.map(v=>`<button onclick="setCash(${v})">${peso(v)}</button>`).join('');
+
+function openPay() {
+  if (!cart.length) return;
+  payMethod = 'Cash'; 
+  setPayMethod('Cash');
+  document.getElementById('cashInput').value = '';
+  document.getElementById('payCashier').value = DB.get(DB.CASHIER, '') || '';
+  const { total } = calc();
+  const opts = [total, Math.ceil(total/50)*50, Math.ceil(total/100)*100, Math.ceil(total/500)*500, 1000];
+  const uniq = [...new Set(opts.filter(v => v >= total))].slice(0, 5);
+  document.getElementById('quickCash').innerHTML = uniq.map(v => `<button onclick="setCash(${v})">${peso(v)}</button>`).join('');
   renderPay();
   document.getElementById('payOverlay').classList.add('show');
 }
-function setCash(v){ document.getElementById('cashInput').value=v; renderPay(); }
-function syncCashier(val){
+
+function setCash(v) { 
+  document.getElementById('cashInput').value = v; 
+  renderPay(); 
+}
+
+function syncCashier(val) {
   DB.set(DB.CASHIER, val);
   const cn = document.getElementById('cashierName');
   if (cn) cn.value = val;
 }
-function renderPay(){
-  const {subtotal,discount,label,total}=calc();
-  const qrMethods = ['Gcash','Maya','qrph','visa'];
+
+function renderPay() {
+  const { subtotal, discount, label, total } = calc();
+  const qrMethods = ['Gcash', 'Maya', 'qrph', 'visa'];
   const isQR = qrMethods.includes(payMethod);
   
-  let html=`<div class="r"><span>Subtotal</span><span>${peso(subtotal)}</span></div>`;
-  if(discount>0) html+=`<div class="r" style="color:#2C7A4B"><span>${label}</span><span>−${peso(discount)}</span></div>`;
-  html+=`<div class="r total"><span>Amount Due</span><span>${peso(total)}</span></div>`;
+  let html = `<div class="r"><span>Subtotal</span><span>${peso(subtotal)}</span></div>`;
+  if (discount > 0) html += `<div class="r" style="color:#2C7A4B"><span>${label}</span><span>−${peso(discount)}</span></div>`;
+  html += `<div class="r total"><span>Amount Due</span><span>${peso(total)}</span></div>`;
   
-  if(!isQR && payMethod==='Cash'){
-    const cash=parseFloat(document.getElementById('cashInput').value)||0;
-    const change=cash-total;
-    html+=`<div class="r"><span>Cash</span><span>${peso(cash)}</span></div>`;
-    html+=`<div class="r change"><span>Change</span><span>${cash>=total?peso(change):'—'}</span></div>`;
-  }else if(isQR){
-    html+=`<div class="r"><span>Payment Method</span><span>${payMethod}</span></div>`;
+  if (!isQR && payMethod === 'Cash') {
+    const cash = parseFloat(document.getElementById('cashInput').value) || 0;
+    const change = cash - total;
+    html += `<div class="r"><span>Cash</span><span>${peso(cash)}</span></div>`;
+    html += `<div class="r change"><span>Change</span><span>${cash >= total ? peso(change) : '—'}</span></div>`;
+  } else if (isQR) {
+    html += `<div class="r"><span>Payment Method</span><span>${payMethod}</span></div>`;
   }
   
-  document.getElementById('paySummary').innerHTML=html;
-  const cp=document.getElementById('confirmPay');
+  document.getElementById('paySummary').innerHTML = html;
+  const cp = document.getElementById('confirmPay');
   
-  if(isQR){
+  if (isQR) {
     cp.disabled = false;
     cp.textContent = 'Complete Sale';
-  }else{
-    const cash=parseFloat(document.getElementById('cashInput').value)||0;
-    cp.disabled = cash<total;
+  } else {
+    const cash = parseFloat(document.getElementById('cashInput').value) || 0;
+    cp.disabled = cash < total;
     cp.textContent = cp.disabled ? 'Insufficient Cash' : 'Complete Sale';
   }
-  cp.style.opacity = cp.disabled?'.45':'1';
+  cp.style.opacity = cp.disabled ? '.45' : '1';
 }
-function confirmPayment(){
-  const {subtotal,discount,label,total}=calc();
-  const qrMethods = ['Gcash','Maya','qrph','visa'];
+
+function confirmPayment() {
+  const { subtotal, discount, label, total } = calc();
+  const qrMethods = ['Gcash', 'Maya', 'qrph', 'visa'];
   const isQR = qrMethods.includes(payMethod);
   
-  if(!isQR){
-    const cash=parseFloat(document.getElementById('cashInput').value)||0;
-    if(cash<total){ toast('Insufficient cash'); return; }
+  if (!isQR) {
+    const cash = parseFloat(document.getElementById('cashInput').value) || 0;
+    if (cash < total) { toast('Insufficient cash'); return; }
   }
   
-  const no=currentOrderNo();
+  const no = currentOrderNo();
   
   // Format items nicely to append modifiers directly on your receipt records logs
   const orderItemsMapped = cart.map(l => {
@@ -488,14 +533,14 @@ function confirmPayment(){
     };
   });
 
-  const order={
-    no, ts:Date.now(),
+  const order = {
+    no, ts: Date.now(),
     items: orderItemsMapped,
-    subtotal, discount, discLabel:label, total,
-    type:orderType, method:payMethod,
+    subtotal, discount, discLabel: label, total,
+    type: orderType, method: payMethod,
     cashier: getCashier(),
-    cash: isQR ? total : parseFloat(document.getElementById('cashInput').value)||0,
-    change: isQR ? 0 : (parseFloat(document.getElementById('cashInput').value)||0) - total
+    cash: isQR ? total : parseFloat(document.getElementById('cashInput').value) || 0,
+    change: isQR ? 0 : (parseFloat(document.getElementById('cashInput').value) || 0) - total
   };
 
   // Safe Cloud Bridge Stream Insertion
@@ -524,32 +569,42 @@ function confirmPayment(){
       });
   }
 
-  const orders=DB.get(DB.ORDERS,[]); orders.unshift(order); DB.set(DB.ORDERS,orders);
-  DB.set(DB.COUNTER,no);
+  const orders = DB.get(DB.ORDERS, []); 
+  orders.unshift(order); 
+  DB.set(DB.ORDERS, orders);
+  DB.set(DB.COUNTER, no);
+  
   closeOverlay('payOverlay');
-  showReceipt(order,true);
-  cart=[]; document.getElementById('discType').value='none'; onDiscChange(); renderCart();
+  showReceipt(order, true);
+  
+  cart = []; 
+  document.getElementById('discType').value = 'none'; 
+  onDiscChange(); 
+  renderCart();
   closeCart();
 }
 
-/* ---------- Receipt ---------- */
-function showReceipt(o, isNew){
-  const dt=new Date(o.ts);
-  const itemsHtml=o.items.map(i=>`
+/* ---------- Thermal Receipts Layout ---------- */
+function showReceipt(o, isNew) {
+  const dt = new Date(o.ts);
+  const itemsHtml = o.items.map(i => `
     <div class="rc-it">
       <div class="l1"><span>${i.qty} × ${i.name}</span><span>${peso(i.price*i.qty)}</span></div>
-      <div class="l2">@ ${peso(i.price)}${i.note?' · '+i.note:''}</div>
+      <div class="l2">@ ${peso(i.price)}${i.note ? ' · ' + i.note : ''}</div>
     </div>`).join('');
-  let tot=`<div class="r"><span>Subtotal</span><span>${peso(o.subtotal)}</span></div>`;
-  if(o.discount>0) tot+=`<div class="r disc"><span>${o.discLabel}</span><span>−${peso(o.discount)}</span></div>`;
-  tot+=`<div class="r grand"><span>TOTAL</span><span>${peso(o.total)}</span></div>`;
-  if(o.method==='Cash'){
-    tot+=`<div class="r"><span>Cash</span><span>${peso(o.cash)}</span></div>`;
-    tot+=`<div class="r"><span>Change</span><span>${peso(o.change)}</span></div>`;
-  }else{
-    tot+=`<div class="r"><span>Paid via</span><span>${o.method}</span></div>`;
+    
+  let tot = `<div class="r"><span>Subtotal</span><span>${peso(o.subtotal)}</span></div>`;
+  if (o.discount > 0) tot += `<div class="r disc"><span>${o.discLabel}</span><span>−${peso(o.discount)}</span></div>`;
+  tot += `<div class="r grand"><span>TOTAL</span><span>${peso(o.total)}</span></div>`;
+  
+  if (o.method === 'Cash') {
+    tot += `<div class="r"><span>Cash</span><span>${peso(o.cash)}</span></div>`;
+    tot += `<div class="r"><span>Change</span><span>${peso(o.change)}</span></div>`;
+  } else {
+    tot += `<div class="r"><span>Paid via</span><span>${o.method}</span></div>`;
   }
-  document.getElementById('receipt').innerHTML=`
+  
+  document.getElementById('receipt').innerHTML = `
     <div class="rc-inner">
       <div class="rc-brand">
         <div class="rn">SABASU</div>
@@ -578,23 +633,29 @@ function showReceipt(o, isNew){
   document.getElementById('rcOverlay').classList.add('show');
 }
 
-/* ---------- History / Sales ---------- */
-function renderHistory(){
-  const orders=DB.get(DB.ORDERS,[]);
-  const today=new Date().toDateString();
-  const todays=orders.filter(o=>new Date(o.ts).toDateString()===today);
-  const todaySales=todays.reduce((s,o)=>s+o.total,0);
-  const allSales=orders.reduce((s,o)=>s+o.total,0);
-  document.getElementById('stats').innerHTML=`
+/* ---------- History & Reports Workspace ---------- */
+function renderHistory() {
+  const orders = DB.get(DB.ORDERS, []);
+  const today = new Date().toDateString();
+  const todays = orders.filter(o => new Date(o.ts).toDateString() === today);
+  const todaySales = todays.reduce((s, o) => s + o.total, 0);
+  const allSales = orders.reduce((s, o) => s + o.total, 0);
+  
+  document.getElementById('stats').innerHTML = `
     <div class="stat"><div class="k">Today's Orders</div><div class="v">${todays.length}</div></div>
     <div class="stat"><div class="k">Today's Sales</div><div class="v">${peso(todaySales)}</div></div>
     <div class="stat"><div class="k">Total Orders</div><div class="v">${orders.length}</div></div>
     <div class="stat"><div class="k">Total Sales</div><div class="v">${peso(allSales)}</div></div>`;
-  const list=document.getElementById('histList');
-  if(!orders.length){ list.innerHTML=`<div class="empty">No sales yet. Completed orders will appear here.</div>`; return; }
-  list.innerHTML=orders.map(o=>{
-    const dt=new Date(o.ts);
-    const n=o.items.reduce((s,i)=>s+i.qty,0);
+    
+  const list = document.getElementById('histList');
+  if (!orders.length) { 
+    list.innerHTML = `<div class="empty">No sales yet. Completed orders will appear here.</div>`; 
+    return; 
+  }
+  
+  list.innerHTML = orders.map(o => {
+    const dt = new Date(o.ts);
+    const n = o.items.reduce((s, i) => s + i.qty, 0);
     return `<div class="hrow">
       <div class="ono">${fmtNo(o.no)}</div>
       <div class="meta">
@@ -607,32 +668,45 @@ function renderHistory(){
     </div>`;
   }).join('');
 }
-function reprint(no){ const o=DB.get(DB.ORDERS,[]).find(x=>x.no===no); if(o) showReceipt(o,false); }
-function clearHistory(){
-  if(!confirm('Delete ALL sales records? This cannot be undone.')) return;
-  DB.set(DB.ORDERS,[]); DB.set(DB.COUNTER,0); renderHistory(); renderCart(); toast('Sales cleared');
-}
-function exportCSV(){
-  const orders=DB.get(DB.ORDERS,[]);
-  if(!orders.length){ toast('No sales to export'); return; }
-  let rows=[['Order','Date','Time','Cashier','Type','Method','Items','Subtotal','Discount','Total','Cash','Change']];
-  orders.slice().reverse().forEach(o=>{
-    const dt=new Date(o.ts);
-    rows.push([fmtNo(o.no),dt.toLocaleDateString('en-PH'),dt.toLocaleTimeString('en-PH'),o.cashier||'',o.type,o.method,
-      o.items.map(i=>i.qty+'x '+i.name).join('; '),o.subtotal,o.discount,o.total,o.cash,o.change]);
-  });
-  const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob=new Blob([csv],{type:'text/csv'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='sabasu_sales_'+new Date().toISOString().slice(0,10)+'.csv';
-  a.click(); toast('CSV exported');
+
+function reprint(no) { 
+  const o = DB.get(DB.ORDERS, []).find(x => x.no === no); 
+  if (o) showReceipt(o, false); 
 }
 
-/* ---------- Menu Manager ---------- */
-function renderManager(){
+function clearHistory() {
+  if (!confirm('Delete ALL sales records? This cannot be undone.')) return;
+  DB.set(DB.ORDERS, []); 
+  DB.set(DB.COUNTER, 0); 
+  renderHistory(); 
+  renderCart(); 
+  toast('Sales cleared');
+}
+
+function exportCSV() {
+  const orders = DB.get(DB.ORDERS, []);
+  if (!orders.length) { toast('No sales to export'); return; }
+  
+  let rows = [['Order','Date','Time','Cashier','Type','Method','Items','Subtotal','Discount','Total','Cash','Change']];
+  orders.slice().reverse().forEach(o => {
+    const dt = new Date(o.ts);
+    rows.push([fmtNo(o.no), dt.toLocaleDateString('en-PH'), dt.toLocaleTimeString('en-PH'), o.cashier||'', o.type, o.method,
+      o.items.map(i => i.qty + 'x ' + i.name).join('; '), o.subtotal, o.discount, o.total, o.cash, o.change]);
+  });
+  
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], {type: 'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'sabasu_sales_' + new Date().toISOString().slice(0, 10) + '.csv';
+  a.click(); 
+  toast('CSV exported');
+}
+
+/* ---------- Menu Manager Catalog Grid ---------- */
+function renderManager() {
   const mgrGrid = document.getElementById('mgrGrid');
-  if(!mgrGrid) return;
+  if (!mgrGrid) return;
 
   mgrGrid.innerHTML = menu.map((m, index) => {
     const thumb = m.img ? `<img src="${m.img}">` : `<span></span>`;
@@ -661,61 +735,62 @@ function renderManager(){
 }
 
 function moveItemInMenu(currentIndex, direction) {
-    const targetIndex = currentIndex + direction;
-    
-    // Guardrail boundary check
-    if (targetIndex < 0 || targetIndex >= menu.length) return;
-    
-    // Perform array swap mechanics
-    const tempItem = menu[currentIndex];
-    menu[currentIndex] = menu[targetIndex];
-    menu[targetIndex] = tempItem;
-    
-    // Save updated index sequence to localStorage
-    DB.set(DB.MENU, menu);
-    
-    // Live update interface renders across modules
-    renderMenu();
-    renderManager();
-    
-    toast("Menu arrangement updated");
+  const targetIndex = currentIndex + direction;
+  
+  // Guardrail boundary check
+  if (targetIndex < 0 || targetIndex >= menu.length) return;
+  
+  // Perform array swap mechanics
+  const tempItem = menu[currentIndex];
+  menu[currentIndex] = menu[targetIndex];
+  menu[targetIndex] = tempItem;
+  
+  // Save updated index sequence to localStorage
+  DB.set(DB.MENU, menu);
+  
+  // Live update interface renders across modules
+  renderMenu();
+  renderManager();
+  
+  toast("Menu arrangement updated");
 }
 
-function openItemEdit(id){
-  editingId=id; pendingImg=null;
-  const m = id?menu.find(x=>x.id===id):null;
+function openItemEdit(id) {
+  editingId = id; 
+  pendingImg = null;
+  const m = id ? menu.find(x => x.id === id) : null;
   
   // Initialize intermediate modular modifier list configuration arrays
   currentAddonsList = m && m.addons ? [...m.addons] : [];
   
-  document.getElementById('itemTitle').textContent=m?'Edit Item':'Add Item';
-  document.getElementById('fName').value=m?m.name:'';
-  document.getElementById('fPrice').value=m?m.price:'';
-  document.getElementById('fCat').value=m?m.cat:'Ramen & Noodles';
-  document.getElementById('fNote').value=m?m.note||'':'';
-  pendingImg = m?m.img||null:null;
+  document.getElementById('itemTitle').textContent = m ? 'Edit Item' : 'Add Item';
+  document.getElementById('fName').value = m ? m.name : '';
+  document.getElementById('fPrice').value = m ? m.price : '';
+  document.getElementById('fCat').value = m ? m.cat : 'Ramen & Noodles';
+  document.getElementById('fNote').value = m ? m.note || '' : '';
+  pendingImg = m ? m.img || null : null;
   
   // Lazily inject modifiers panel shell wrapper context into the management modal view on the fly
   let addonsSection = document.getElementById('modalAddonsSection');
-  if(!addonsSection) {
-     addonsSection = document.createElement('div');
-     addonsSection.id = 'modalAddonsSection';
-     addonsSection.className = 'addons-manager-section';
-     const parentForm = document.getElementById('fName').parentElement.parentElement;
-     const photoLabel = document.querySelector('.popup-body label[for="fImg"]') || document.getElementById('fImg').parentElement;
-     parentForm.insertBefore(addonsSection, photoLabel);
+  if (!addonsSection) {
+    addonsSection = document.createElement('div');
+    addonsSection.id = 'modalAddonsSection';
+    addonsSection.className = 'addons-manager-section';
+    const parentForm = document.getElementById('fName').parentElement.parentElement;
+    const photoLabel = document.querySelector('.popup-body label[for="fImg"]') || document.getElementById('fImg').parentElement;
+    parentForm.insertBefore(addonsSection, photoLabel);
   }
   
   renderModalAddonsManager();
-  updatePrev(m?m.cat:'Ramen & Noodles');
-  document.getElementById('fDelete').style.display=m?'block':'none';
-  document.getElementById('fImg').value='';
+  updatePrev(m ? m.cat : 'Ramen & Noodles');
+  document.getElementById('fDelete').style.display = m ? 'block' : 'none';
+  document.getElementById('fImg').value = '';
   document.getElementById('itemOverlay').classList.add('show');
 }
 
 function renderModalAddonsManager() {
   const container = document.getElementById('modalAddonsSection');
-  if(!container) return;
+  if (!container) return;
   
   container.innerHTML = `
     <div class="addons-label">Configure Item Add-ons / Modifiers</div>
@@ -741,7 +816,7 @@ function addNewAddonTag() {
   const name = nameInp.value.trim();
   const price = parseFloat(priceInp.value) || 0;
   
-  if(!name) { toast('Enter modifier name'); return; }
+  if (!name) { toast('Enter modifier name'); return; }
   currentAddonsList.push({ name, price });
   nameInp.value = '';
   priceInp.value = '';
@@ -753,70 +828,109 @@ function removeAddonTag(idx) {
   renderModalAddonsManager();
 }
 
-function updatePrev(cat){
-  const p=document.getElementById('fPrev');
-  if(pendingImg){ p.innerHTML=`<img src="${pendingImg}">`; document.getElementById('fRemove').style.display='block'; }
-  else { p.innerHTML=''; p.style.background=CAT_GRAD[cat]||'#333'; document.getElementById('fRemove').style.display='none'; }
+function updatePrev(cat) {
+  const p = document.getElementById('fPrev');
+  if (pendingImg) { 
+    p.innerHTML = `<img src="${pendingImg}">`; 
+    document.getElementById('fRemove').style.display = 'block'; 
+  } else { 
+    p.innerHTML = ''; 
+    p.style.background = CAT_GRAD[cat] || '#333'; 
+    document.getElementById('fRemove').style.display = 'none'; 
+  }
 }
-function onImgPick(e){
-  const f=e.target.files[0]; if(!f) return;
-  const r=new FileReader();
-  r.onload=ev=>{
-    const img=new Image();
-    img.onload=()=>{
-      const max=600, sc=Math.min(1,max/Math.max(img.width,img.height));
-      const c=document.createElement('canvas');
-      c.width=img.width*sc; c.height=img.height*sc;
-      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-      pendingImg=c.toDataURL('image/jpeg',0.82);
+
+function onImgPick(e) {
+  const f = e.target.files[0]; 
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      const max = 600, sc = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = img.width * sc; 
+      c.height = img.height * sc;
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      pendingImg = c.toDataURL('image/jpeg', 0.82);
       updatePrev(document.getElementById('fCat').value);
     };
-    img.src=ev.target.result;
+    img.src = ev.target.result;
   };
   r.readAsDataURL(f);
 }
-function removeImg(){ pendingImg=null; updatePrev(document.getElementById('fCat').value); }
 
-function saveItem(){
-  const name=document.getElementById('fName').value.trim();
-  const price=parseFloat(document.getElementById('fPrice').value);
-  const cat=document.getElementById('fCat').value;
-  const note=document.getElementById('fNote').value.trim();
-  if(!name){ toast('Enter an item name'); return; }
-  if(isNaN(price)||price<0){ toast('Enter a valid price'); return; }
-  if(editingId){
-    const m=menu.find(x=>x.id===editingId);
-    Object.assign(m,{name,price,cat,note,img:pendingImg||null, addons: currentAddonsList});
-  }else{
-    menu.push({id:'x'+Date.now(),name,price,cat,note,img:pendingImg||null, addons: currentAddonsList});
+function removeImg() { 
+  pendingImg = null; 
+  updatePrev(document.getElementById('fCat').value); 
+}
+
+function saveItem() {
+  const name = document.getElementById('fName').value.trim();
+  const price = parseFloat(document.getElementById('fPrice').value);
+  const cat = document.getElementById('fCat').value;
+  const note = document.getElementById('fNote').value.trim();
+  
+  if (!name) { toast('Enter an item name'); return; }
+  if (isNaN(price) || price < 0) { toast('Enter a valid price'); return; }
+  
+  if (editingId) {
+    const m = menu.find(x => x.id === editingId);
+    Object.assign(m, {name, price, cat, note, img: pendingImg || null, addons: currentAddonsList});
+  } else {
+    menu.push({id: 'x' + Date.now(), name, price, cat, note, img: pendingImg || null, addons: currentAddonsList});
   }
-  DB.set(DB.MENU,menu);
-  closeOverlay('itemOverlay'); renderManager(); renderMenu(); toast('Item saved ✓');
-}
-function deleteItem(){
-  if(!editingId) return;
-  if(!confirm('Delete this item?')) return;
-  menu=menu.filter(x=>x.id!==editingId); DB.set(DB.MENU,menu);
-  cart=cart.filter(l=>l.id!==editingId);
-  closeOverlay('itemOverlay'); renderManager(); renderMenu(); renderCart(); toast('Item deleted');
-}
-function resetMenu(){
-  if(!confirm('Reset menu to the original SABASU list? Custom items & photos will be removed.')) return;
-  menu=DEFAULT_MENU.map(x=>({...x})); DB.set(DB.MENU,menu); renderManager(); renderMenu(); toast('Menu reset');
+  DB.set(DB.MENU, menu);
+  closeOverlay('itemOverlay'); 
+  renderManager(); 
+  renderMenu(); 
+  toast('Item saved ✓');
 }
 
-/* ---------- Misc ---------- */
-function closeOverlay(id){ document.getElementById(id).classList.remove('show'); }
+function deleteItem() {
+  if (!editingId) return;
+  if (!confirm('Delete this item?')) return;
+  
+  menu = menu.filter(x => x.id !== editingId); 
+  DB.set(DB.MENU, menu);
+  cart = cart.filter(l => l.id !== editingId);
+  
+  closeOverlay('itemOverlay'); 
+  renderManager(); 
+  renderMenu(); 
+  renderCart(); 
+  toast('Item deleted');
+}
+
+function resetMenu() {
+  if (!confirm('Reset menu to the original SABASU list? Custom items & photos will be removed.')) return;
+  menu = DEFAULT_MENU.map(x => ({...x})); 
+  DB.set(DB.MENU, menu); 
+  renderManager(); 
+  renderMenu(); 
+  toast('Menu reset');
+}
+
+/* ---------- Overlay & Alert Notification Utilities ---------- */
+function closeOverlay(id) { document.getElementById(id).classList.remove('show'); }
 let toastT;
-function toast(msg){
-  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
-  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2200);
+function toast(msg) {
+  const t = document.getElementById('toast'); 
+  // Update inner text safely without altering structure
+  t.innerHTML = '🔔 ' + msg;
+  t.classList.add('show');
+  clearTimeout(toastT); 
+  toastT = setTimeout(() => t.classList.remove('show'), 2200);
 }
-document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{ if(e.target===o) o.classList.remove('show'); }));
-const fCatEl = document.getElementById('fCat');
-if (fCatEl) fCatEl.addEventListener('change',e=>{ if(!pendingImg) updatePrev(e.target.value); });
 
-/* ---------- Init ---------- */
+document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('show'); }));
+const fCatEl = document.getElementById('fCat');
+if (fCatEl) fCatEl.addEventListener('change', e => { if (!pendingImg) updatePrev(e.target.value); });
+
+/* ---------- System Initialization ---------- */
 initCashier();
-renderCats(); renderMenu(); renderCart(); onDiscChange();
+renderCats(); 
+renderMenu(); 
+renderCart(); 
+onDiscChange();
 initAuth(); // Launches auth session verification triggers

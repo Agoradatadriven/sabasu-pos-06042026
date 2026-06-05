@@ -242,7 +242,6 @@ main {
   min-height: 0;
 }
 
-/* Enclosed Left Sidebar navigation panel wrapping wrapper element */
 .sidebar-panel {
   width: 230px;
   background: var(--bg-panel);
@@ -266,7 +265,7 @@ main {
 }
 
 .sidebar-footer {
-  margin-top: auto;         /* Locks connection container track flush to absolute base */
+  margin-top: auto;
   padding-top: 15px;
   border-top: 1px dashed var(--line-strong);
 }
@@ -299,18 +298,16 @@ main {
   padding: 16px 18px;
 }
 
-/* Left-aligned Vertical Category Navigation Sidebar */
 .cats {
   display: flex;
   flex-direction: column; 
   gap: 10px;
   flex: 1;
-  overflow-y: auto;       /* Infinite downward scrolling capabilities */
+  overflow-y: auto;
   padding-right: 2px;
   align-content: start;
 }
 
-/* Full-width Kiosk Sidebar Selection Form Fields */
 .cat {
   width: 100%;
   padding: 14px 16px;
@@ -322,7 +319,7 @@ main {
   color: var(--ink-muted);
   transition: 0.15s;
   white-space: nowrap;
-  text-align: left;       /* Flush left structural typography alignment */
+  text-align: left;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -344,7 +341,6 @@ main {
   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
 }
 
-/* Catalog Product Cards */
 .card {
   background: var(--bg-surface);
   border: 1px solid var(--line-strong);
@@ -890,39 +886,6 @@ main {
   padding-right: 4px;
 }
 
-/* ---------- Menu Item Sorting Controls ---------- */
-.mcard-actions {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-left: auto;
-  flex-shrink: 0;
-}
-
-.btn-sort {
-  font-size: 14px;
-  opacity: 0.4;
-  padding: 6px;
-  color: var(--ink);
-  transition: opacity 0.15s, color 0.15s;
-}
-
-.btn-sort:hover {
-  opacity: 1;
-  color: var(--primary);
-}
-
-.btn-sort:disabled {
-  opacity: 0.1 !important;
-  cursor: not-allowed;
-}
-
-/* Adjust the existing edit button to match the actions row package layout */
-.mcard .medit {
-  margin-left: 0 !important;
-  padding: 6px;
-}
-
 .mcard {
   background: var(--bg-surface);
   border: 1px solid var(--line-strong);
@@ -978,11 +941,44 @@ main {
   margin-top: 2px;
 }
 
+/* ---------- Menu Item Sorting Controls & Actions ---------- */
+.mcard-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.btn-sort {
+  background: none;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  opacity: 0.35;
+  padding: 6px;
+  color: var(--ink);
+  transition: opacity 0.15s, color 0.15s;
+}
+
+.btn-sort:hover {
+  opacity: 1;
+  color: var(--primary);
+}
+
+.btn-sort:disabled {
+  opacity: 0.05 !important;
+  cursor: not-allowed;
+}
+
 .mcard .medit {
-  font-size: 18px;
+  font-size: 16px;
   opacity: 0.5;
   padding: 6px;
   color: var(--ink);
+  margin-left: 0 !important;
+  cursor: pointer;
+  transition: opacity 0.15s, color 0.15s;
 }
 
 .mcard .medit:hover {
@@ -1129,111 +1125,6 @@ main {
   color: var(--primary);
 }
 
-/* Dynamic Item Customization Layout Options Control UI */
-.custom-qty-counter {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--bg-main);
-  border: 1px solid var(--line-strong);
-  border-radius: 12px;
-  padding: 6px;
-  width: 160px;
-  margin: 0 auto;
-}
-
-.custom-qty-counter .qty-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  background: var(--bg-surface);
-  border: 1px solid var(--line-strong);
-  color: var(--ink);
-  font-weight: 700;
-  font-size: 18px;
-  display: grid;
-  place-items: center;
-}
-
-.custom-qty-counter input {
-  flex: 1;
-  border: none;
-  background: transparent;
-  text-align: center;
-  font-family: "JetBrains Mono", monospace;
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--ink);
-  width: 100%;
-}
-
-.custom-group {
-  border-top: 1px solid var(--line);
-  margin-top: 15px;
-  padding-top: 12px;
-}
-
-.custom-group-title {
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 700;
-  color: var(--ink-muted);
-  margin-bottom: 8px;
-}
-
-.custom-option-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 4px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--ink);
-}
-
-.custom-option-row input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--primary);
-  cursor: pointer;
-}
-
-.custom-radio-grid {
-  display: flex;
-  gap: 8px;
-}
-
-.custom-radio-card {
-  flex: 1;
-  border: 1px solid var(--line-strong);
-  background: var(--bg-main);
-  border-radius: 10px;
-  padding: 10px;
-  text-align: center;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--ink-muted);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  transition: 0.15s;
-}
-
-.custom-radio-card input[type="radio"] {
-  accent-color: var(--primary);
-  margin: 0;
-}
-
-.custom-radio-card:has(input:checked) {
-  border-color: var(--primary);
-  background: var(--bg-surface);
-  color: var(--primary);
-}
-
 .pay-summary {
   background: var(--bg-main);
   border: 1px solid var(--line-strong);
@@ -1268,7 +1159,6 @@ main {
   font-size: 18px;
 }
 
-/* Flex Payment Selection Method Grid Row */
 .pay-methods {
   display: flex !important;
   flex-wrap: wrap !important;
@@ -1342,7 +1232,6 @@ main {
   font-weight: 500;
 }
 
-/* Scaling Rules for Icons inside Grid Fields */
 .pay-icon {
   width: 18px !important;
   height: 18px !important;
@@ -1616,10 +1505,11 @@ main {
     border-right: none;
     border-bottom: 1px solid var(--line-strong);
     padding: 12px 14px;
+    height: auto;
   }
 
   .sidebar-header {
-    display: none; /* Hide header text layout on mobile view */
+    display: none;
   }
 
   .menu-area {
@@ -1627,7 +1517,7 @@ main {
   }
   
   .cats {
-    flex-direction: row;    /* Re-enables touch-friendly horizontal ribbon bar scroll on mobile viewports */
+    flex-direction: row;
     width: 100%;
     overflow-x: auto;
     overflow-y: hidden;
@@ -1735,9 +1625,9 @@ main {
   inset: 0;
   background-color: var(--bg-main);
   display: flex;
-  align-items: center;      /* Vertically centers the login box */
-  justify-content: center;  /* Horizontally centers the login box */
-  z-index: 99999;           /* Layers securely above all workspace elements */
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
   padding: 20px;
 }
 
@@ -1797,36 +1687,129 @@ main {
   .rc-actions {
     display: none !important;
   }
-  /* ---------- Menu Item Sorting Controls ---------- */
-.mcard-actions {
+}
+
+/* ============================================================
+   ADDITIONAL TARGETS: KIOSK CUSTOMIZATION COMPONENT UI
+   ============================================================ */
+.addons-manager-section {
+  margin: 16px 0;
+  border-top: 1px dashed var(--line-strong);
+  padding-top: 14px;
+}
+
+.addons-label {
+  font-size: 11.5px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+
+.addons-input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.btn-add-addon {
+  background: var(--ink);
+  color: var(--bg-surface);
+  border: none;
+  padding: 0 16px;
+  border-radius: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.addons-list-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 110px;
+  overflow-y: auto;
+}
+
+.addon-tag {
+  display: inline-flex;
+  align-items: center;
+  background: var(--secondary);
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+
+.addon-tag .remove-btn {
+  background: none;
+  border: none;
+  color: var(--red);
+  margin-left: 6px;
+  cursor: pointer;
+  font-weight: 900;
+  padding: 2px;
+}
+
+.kiosk-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin: 14px 0;
+  max-height: 250px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.kiosk-addon-row {
   display: flex;
   align-items: center;
-  gap: 4px;
-  margin-left: auto;
-  flex-shrink: 0;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--bg-main);
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
-.btn-sort {
-  font-size: 14px;
-  opacity: 0.4;
-  padding: 6px;
+.kiosk-addon-row:hover {
+  background: var(--bg-surface);
+  border-color: var(--primary);
+}
+
+.kiosk-addon-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--green);
+  cursor: pointer;
+}
+
+.kiosk-addon-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.kiosk-addon-name {
+  font-weight: 700;
   color: var(--ink);
-  transition: opacity 0.15s, color 0.15s;
+  font-size: 14.5px;
 }
 
-.btn-sort:hover {
-  opacity: 1;
+.kiosk-addon-price {
   color: var(--primary);
+  font-weight: 700;
+  font-size: 13px;
+  font-family: "JetBrains Mono", monospace;
 }
 
-.btn-sort:disabled {
-  opacity: 0.1 !important;
-  cursor: not-allowed;
-}
-
-/* Adjust the existing edit button to match the actions row package layout */
-.mcard .medit {
-  margin-left: 0 !important;
-  padding: 6px;
-}
+.cart-addon-inline {
+  font-size: 11.5px;
+  color: var(--ink-muted);
+  margin-top: 3px;
+  font-weight: 500;
+  display: block;
 }

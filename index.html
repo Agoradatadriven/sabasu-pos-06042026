@@ -1,19 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#16121f">
-<title>SABASU Noodle Bar — POS</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#16121f">
+  <title>SABASU Noodle Bar — POS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<!-- Clean Centered Login Panel Overlay -->
 <div id="loginView" class="auth-container" style="display: flex;">
   <div class="auth-card">
     <div class="auth-header">
@@ -34,7 +33,6 @@
   </div>
 </div>
 
-<!-- Main Application Shell Interface Wrapper -->
 <div id="app" style="display: none;">
   <header class="topbar">
     <div class="brand">
@@ -45,7 +43,6 @@
       </div>
     </div>
 
-    <!-- Cashier name identity configuration slot -->
     <div class="cashier">
       <span class="ic">👤</span>
       <div>
@@ -54,25 +51,21 @@
       </div>
     </div>
 
-    <!-- Clean Layout Navigation Menu Row -->
     <nav class="topnav">
       <button data-view="pos" class="active"><span class="lbl">ORDER</span></button>
       <button data-view="hist"><span class="lbl">RECORDS</span></button>
-      <button data-view="mgr"><span class="lbl">ADD ITEM</span></button>
+      <button data-view="mgr"><span class="lbl">MANAGER</span></button>
     </nav>
     <div class="clock" id="clock"></div>
   </header>
 
   <main>
-    <!-- ============ POS VIEW ============ -->
     <section class="view active" id="view-pos">
       <div class="pos">
-        <!-- Structural left column panel wrapping category navigation selection paths -->
         <div class="sidebar-panel">
           <div class="sidebar-header">Categories</div>
           <div class="cats" id="cats"></div>
           
-          <!-- Bottom Left Sign Out Container Anchor Placement -->
           <div class="sidebar-footer">
             <button id="signOutBtn" class="btn-signout" onclick="handleSignOut()">SIGN OUT</button>
           </div>
@@ -105,16 +98,15 @@
               <input id="discVal" type="number" min="0" placeholder="0" style="display:none" oninput="renderTotals()">
             </div>
             <div class="totals" id="totals"></div>
-            <div class="actions">
-              <button class="btn btn-clear" onclick="clearCart()" title="Clear order">🗑</button>
-              <button class="btn btn-pay" id="payBtn" onclick="openPay()" disabled>Charge ₱0</button>
+            <div class="box-actions" style="display: flex; gap: 8px; width: 100%;">
+              <button class="btn btn-clear" onclick="clearCart()" title="Clear order" style="width: 54px; height: 50px; display: grid; place-items: center;">🗑</button>
+              <button class="btn btn-pay" id="payBtn" onclick="openPay()" disabled style="flex: 1; height: 50px;">Charge ₱0</button>
             </div>
           </div>
         </aside>
       </div>
     </section>
 
-    <!-- ============ SALES / HISTORY VIEW ============ -->
     <section class="view" id="view-hist">
       <div class="hist">
         <div class="hist-top">
@@ -129,7 +121,6 @@
       </div>
     </section>
 
-    <!-- ============ MENU MANAGER VIEW ============ -->
     <section class="view" id="view-mgr">
       <div class="mgr">
         <div class="mgr-top">
@@ -143,35 +134,22 @@
   </main>
 </div>
 
-<!-- ============ ITEM CUSTOMIZATION MODAL ============ -->
-<div class="overlay" id="customOverlay">
-  <div class="modal" style="max-width: 480px;">
+<div class="overlay" id="kioskOverlay">
+  <div class="modal" style="max-width: 420px;">
     <div class="modal-head">
-      <h3 id="customItemName">Customize Item</h3>
-      <button class="x" onclick="closeOverlay('customOverlay')">×</button>
+      <h3 id="kioskItemTitle">Customize Item</h3>
+      <button class="x" onclick="closeOverlay('kioskOverlay')">✕</button>
     </div>
-    <div class="modal-body" style="padding-top: 10px;">
-      <div id="customItemPriceLabel" style="font-family:'JetBrains Mono', monospace; font-size:16px; color:var(--primary); font-weight:700; margin-bottom:15px;"></div>
-      
-      <!-- Dynamic Customization Options Panel Slot -->
-      <div id="customOptionsContainer"></div>
-      
-      <!-- Quantity Setup Panel Counter Target -->
-      <div class="fld" style="margin-top: 20px;">
-        <label>Select Quantity</label>
-        <div class="custom-qty-counter">
-          <button class="qty-btn" onclick="adjustCustomQty(-1)">−</button>
-          <input type="number" id="customQtyInput" value="1" min="1" readonly>
-          <button class="qty-btn" onclick="adjustCustomQty(1)">＋</button>
-        </div>
-      </div>
-      
-      <button class="btn btn-pay" id="customConfirmBtn" style="width:100%; margin-top:20px; padding:15px; font-size:16px;" onclick="confirmCustomAdd()">Add to Order — ₱0</button>
+    <div class="modal-body">
+      <div class="addons-label">Select Optional Add-ons</div>
+      <div id="kioskAddonsGrid" class="kiosk-grid"></div>
+      <button id="kioskSubmitBtn" class="rc-print" style="width:100%; margin-top:15px; background:var(--green); color:white; border:none; padding:14px; border-radius:11px; font-weight:800; font-size:15px; cursor:pointer;">
+        Confirm &amp; Add to Order
+      </button>
     </div>
   </div>
 </div>
 
-<!-- ============ PAYMENT MODAL ============ -->
 <div class="overlay" id="payOverlay">
   <div class="modal">
     <div class="modal-head"><h3>Payment</h3><button class="x" onclick="closeOverlay('payOverlay')">×</button></div>
@@ -179,13 +157,12 @@
       <div class="pay-summary" id="paySummary"></div>
       <div class="pay-methods" id="payMethods">
         <button class="active" data-m="Cash" onclick="setPayMethod('Cash')"> 💵 Cash </button>
-        <button data-m="Gcash" onclick="setPayMethod('Gcash')"> <img src="Icon/icon-gcash.png" alt="GCash" class="pay-icon"> GCash </button>
-        <button data-m="Maya" onclick="setPayMethod('Maya')"> <img src="Icon/icon-maya.jpg" alt="Maya" class="pay-icon"> Maya </button>
-        <button data-m="qrph" onclick="setPayMethod('qrph')"> <img src="Icon/icon-qrph.png" alt="QRph" class="pay-icon"> QRph </button>
-        <button data-m="visa" onclick="setPayMethod('visa')"> <img src="Icon/icon-visa.png" alt="Visa" class="pay-icon"> Visa </button>
+        <button data-m="Gcash" onclick="setPayMethod('Gcash')"> <img src="Qr/qr-gcash.png" alt="GCash" class="pay-icon" onerror="this.style.display='none'"> GCash </button>
+        <button data-m="Maya" onclick="setPayMethod('Maya')"> <img src="Qr/qr-maya.png" alt="Maya" class="pay-icon" onerror="this.style.display='none'"> Maya </button>
+        <button data-m="qrph" onclick="setPayMethod('qrph')"> <img src="Qr/qr-qrph.png" alt="QRph" class="pay-icon" onerror="this.style.display='none'"> QRph </button>
+        <button data-m="visa" onclick="setPayMethod('visa')"> <img src="Qr/qr-visa.png" alt="Visa" class="pay-icon" onerror="this.style.display='none'"> Visa </button>
       </div>
 
-      <!-- QR Code Display -->
       <div class="qr-display" id="qrDisplay">
         <div class="qr-label" id="qrLabel">GCash Payment</div>
         <div class="qr-img"><img id="qrImage" src="" alt="QR Code"></div>
@@ -206,14 +183,12 @@
   </div>
 </div>
 
-<!-- ============ RECEIPT MODAL ============ -->
 <div class="overlay" id="rcOverlay">
   <div class="modal" style="max-width:380px;background:transparent;border:none;box-shadow:none;">
     <div id="receipt"></div>
   </div>
 </div>
 
-<!-- ============ ITEM EDIT MODAL ============ -->
 <div class="overlay" id="itemOverlay">
   <div class="modal">
     <div class="modal-head"><h3 id="itemTitle">Add Item</h3><button class="x" onclick="closeOverlay('itemOverlay')">×</button></div>
@@ -230,11 +205,11 @@
         <div class="fld" style="flex:1;">
           <label>Category</label>
           <select id="fCat">
-            <option>Ramen &amp; Noodles</option>
-            <option>Pasta</option>
-            <option>Sides</option>
-            <option>Coffee</option>
-            <option>Beverages</option>
+            <option value="Ramen &amp; Noodles">Ramen &amp; Noodles</option>
+            <option value="Pasta">Pasta</option>
+            <option value="Sides">Sides</option>
+            <option value="Coffee">Coffee</option>
+            <option value="Beverages">Beverages</option>
           </select>
         </div>
       </div>
@@ -242,6 +217,9 @@
         <label>Note / Size (optional)</label>
         <input id="fNote" type="text" placeholder="e.g. 130ml">
       </div>
+
+      <div id="modalAddonsSection" class="addons-manager-section"></div>
+
       <div class="fld">
         <label>Photo (optional — add later)</label>
         <div class="img-pick">
@@ -264,6 +242,6 @@
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js?v=5"></script>
+<script src="js/app.js"></script>
 </body>
 </html>
