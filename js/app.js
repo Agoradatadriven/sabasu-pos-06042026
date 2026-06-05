@@ -297,7 +297,7 @@ function launchKioskCustomizer(item) {
             <span class="kiosk-addon-name">${add.name}</span>
             <span class="kiosk-addon-price">+ ${peso(add.price)}</span>
           </div>
-          <input type="checkbox" id="kchk_${idx}" value="${idx}" onchange="updateKioskTotalPrice(); event.stopPropagation();">
+          <input type="checkbox" id="kchk_${idx}" value="${idx}" onclick="event.stopPropagation();" onchange="updateKioskTotalPrice();">
         </div>
       `).join('');
     } else {
@@ -799,7 +799,6 @@ function renderManager() {
           <div class="mp">${peso(m.price)}</div>
         </div>
         
-        <!-- Action Controls Cluster -->
         <div class="mcard-actions">
           <button class="btn-sort" onclick="moveItemInMenu(${index}, -1)" ${isFirst ? 'disabled' : ''} title="Move Up">▲</button>
           <button class="btn-sort" onclick="moveItemInMenu(${index}, 1)" ${isLast ? 'disabled' : ''} title="Move Down">▼</button>
