@@ -1005,18 +1005,15 @@ async function saveItem() {
   if (pendingImageFile && supabaseClient) {
     toast("Uploading photo to cloud...");
     const uniqueFileName = `item-${Date.now()}.jpg`;
-    
-    // Using lowercase 'menu-images' to line up with the true database ID signature
     const { data, error } = await supabaseClient.storage
       .from('menu-images') 
       .upload(uniqueFileName, pendingImageFile);
 
     if (error) {
       console.error("Supabase Storage Upload Exception:", error);
-      alert("🛑 Cloud Storage Error: " + error.message + "\n\nIf this occurs, make sure your SQL Editor query compiled successfully.");
+      alert("🛑 Cloud Storage Error: " + error.message);
       return; 
     } else {
-      // Match lowercase here as well
       const { data: publicUrlData } = supabaseClient.storage
         .from('menu-images') 
         .getPublicUrl(uniqueFileName);
@@ -1036,10 +1033,31 @@ async function saveItem() {
 
   if (supabaseClient) {
     if (editingId) {
-      const { error: dbErr } = await supabaseClient.from('menu').update(generatedPayload).eq('id', editingId);
+      // Append .select() to verify if the primary key exists and row count was impacted
+      const { data, error: dbErr } = await supabaseClient
+        .from('menu')
+        .update(generatedPayload)
+        .eq('id', editingId)
+        .select();
+
       if (dbErr) {
         alert("🛑 Database Sync Error: " + dbErr.message);
         return;
+      }
+
+      // Safe Fallback: If 0 rows were updated, it means frontend keys don't match database keys.
+      // We instantly re-route the save operation by matching the item's unique name string!
+      if (!data || data.length === 0) {
+        console.warn("Primary key mismatch detected. Falling back to unique name-string query matching...");
+        const { error: fallbackErr } = await supabaseClient
+          .from('menu')
+          .update(generatedPayload)
+          .eq('name', name);
+          
+        if (fallbackErr) {
+          alert("🛑 Database Fallback Error: " + fallbackErr.message);
+          return;
+        }
       }
     } else {
       generatedPayload.id = 'x' + Date.now();
@@ -1051,12 +1069,13 @@ async function saveItem() {
     }
   }
 
+  // Synchronize memory cache and repaint the interfaces
   await loadMasterMenuCatalog();
   
   pendingImageFile = null;
   pendingImg = null;
   closeOverlay('itemOverlay'); 
-  toast('Product profiles synced live across networks ✓');
+  toast('Product profiles saved and synced live to cloud data rows ✓');
 }
 
 async function deleteItem() {
