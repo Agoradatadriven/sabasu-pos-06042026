@@ -135,16 +135,25 @@
 </div>
 
 <div class="overlay" id="kioskOverlay">
-  <div class="modal" style="max-width: 420px;">
+  <div class="modal" style="max-width: 440px;">
     <div class="modal-head">
       <h3 id="kioskItemTitle">Customize Item</h3>
       <button class="x" onclick="closeOverlay('kioskOverlay')">✕</button>
     </div>
     <div class="modal-body">
-      <div class="addons-label">Select Optional Add-ons</div>
+      
+      <div id="kioskItemImageFrame" class="kiosk-modal-thumb"></div>
+      
+      <div class="addons-label" style="margin-top: 14px;">Select Optional Add-ons</div>
       <div id="kioskAddonsGrid" class="kiosk-grid"></div>
+      
+      <div class="fld" style="margin-top: 12px; margin-bottom: 5px;">
+        <label>Special Instructions / Notes</label>
+        <input type="text" id="kioskItemNotesInput" placeholder="e.g., No onions, extra spicy, sauce on side" autocomplete="off">
+      </div>
+      
       <button id="kioskSubmitBtn" class="rc-print" style="width:100%; margin-top:15px; background:var(--green); color:white; border:none; padding:14px; border-radius:11px; font-weight:800; font-size:15px; cursor:pointer;">
-        Confirm &amp; Add to Order
+        Confirm &amp; Add to Order — ₱0
       </button>
     </div>
   </div>
