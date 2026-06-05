@@ -108,33 +108,28 @@ const CAT_GRAD = {
 };
 
 const DEFAULT_MENU = [
-  {id: 'm1', name: 'Shoyu Tonkotsu Ramen', price: 130, cat: 'Ramen & Noodles', note: '', addons: []},
-  {id: 'm2', name: 'Zaru Soba Cold Noodles', price: 160, cat: 'Ramen & Noodles', note: '', addons: []},
-  {id: 'm3', name: 'Jin Ramyeon', price: 150, cat: 'Ramen & Noodles', note: '', addons: []},
-  {id: 'm4', name: 'Shin Ramyeon', price: 150, cat: 'Ramen & Noodles', note: '', addons: []},
-  {id: 'm5', name: 'Buldak Carbonara', price: 150, cat: 'Pasta', note: '', addons: []},
-  {id: 's1', name: 'French Fries', price: 70, cat: 'Sides', note: '', addons: []},
-  {id: 's2', name: 'Beef Nachos', price: 135, cat: 'Sides', note: '', addons: []},
-  {id: 'c1', name: 'Cafe Americano', price: 70, cat: 'Coffee', note: '130ml', addons: []},
-  {id: 'c2', name: 'Cafe Latte', price: 90, cat: 'Coffee', note: '130ml', addons: []},
-  {id: 'c3', name: 'Iced Honey Chia Refresher', price: 75, cat: 'Coffee', note: '', addons: []},
-  {id: 'b1', name: 'Coca-Cola', price: 55, cat: 'Beverages', note: '', addons: []},
-  {id: 'b2', name: 'Canada Dry', price: 60, cat: 'Beverages', note: '', addons: []},
-  {id: 'b3', name: 'Dr. Pepper', price: 60, cat: 'Beverages', note: '', addons: []},
-  {id: 'b4', name: 'Bottled Water', price: 25, cat: 'Beverages', note: '', addons: []},
-  {id: 'b5', name: 'C2 Solo', price: 25, cat: 'Beverages', note: '', addons: []},
-  {id: 'b6', name: 'Sparkling Water Maison Perrier', price: 80, cat: 'Beverages', note: '', addons: []},
-  {id: 'b7', name: 'Iced Dark Cafe', price: 70, cat: 'Beverages', note: '', addons: []},
-  {id: 'b8', name: 'Bundaberg', price: 135, cat: 'Beverages', note: '', addons: []},
-  {id: 'b9', name: 'Starbucks Double Shot', price: 120, cat: 'Beverages', note: '', addons: []}
+  {id: 'm1', name: 'Shoyu Tonkotsu Ramen', price: 130, cat: 'Ramen & Noodles', note: '', addons: [], sort_order: 1},
+  {id: 'm2', name: 'Zaru Soba Cold Noodles', price: 160, cat: 'Ramen & Noodles', note: '', addons: [], sort_order: 2},
+  {id: 'm3', name: 'Jin Ramyeon', price: 150, cat: 'Ramen & Noodles', note: '', addons: [], sort_order: 3},
+  {id: 'm4', name: 'Shin Ramyeon', price: 150, cat: 'Ramen & Noodles', note: '', addons: [], sort_order: 4},
+  {id: 'm5', name: 'Buldak Carbonara', price: 150, cat: 'Pasta', note: '', addons: [], sort_order: 5},
+  {id: 's1', name: 'French Fries', price: 70, cat: 'Sides', note: '', addons: [], sort_order: 6},
+  {id: 's2', name: 'Beef Nachos', price: 135, cat: 'Sides', note: '', addons: [], sort_order: 7},
+  {id: 'c1', name: 'Cafe Americano', price: 70, cat: 'Coffee', note: '130ml', addons: [], sort_order: 8},
+  {id: 'c2', name: 'Cafe Latte', price: 90, cat: 'Coffee', note: '130ml', addons: [], sort_order: 9},
+  {id: 'c3', name: 'Iced Honey Chia Refresher', price: 75, cat: 'Coffee', note: '', addons: [], sort_order: 10},
+  {id: 'b1', name: 'Coca-Cola', price: 55, cat: 'Beverages', note: '', addons: [], sort_order: 11},
+  {id: 'b2', name: 'Canada Dry', price: 60, cat: 'Beverages', note: '', addons: [], sort_order: 12},
+  {id: 'b3', name: 'Dr. Pepper', price: 60, cat: 'Beverages', note: '', addons: [], sort_order: 13},
+  {id: 'b4', name: 'Bottled Water', price: 25, cat: 'Beverages', note: '', addons: [], sort_order: 14},
+  {id: 'b5', name: 'C2 Solo', price: 25, cat: 'Beverages', note: '', addons: [], sort_order: 15},
+  {id: 'b6', name: 'Sparkling Water Maison Perrier', price: 80, cat: 'Beverages', note: '', addons: [], sort_order: 16},
+  {id: 'b7', name: 'Iced Dark Cafe', price: 70, cat: 'Beverages', note: '', addons: [], sort_order: 17},
+  {id: 'b8', name: 'Bundaberg', price: 135, cat: 'Beverages', note: '', addons: [], sort_order: 18},
+  {id: 'b9', name: 'Starbucks Double Shot', price: 120, cat: 'Beverages', note: '', addons: [], sort_order: 19}
 ];
 
-let menu = DB.get(DB.MENU, null);
-if (!menu) { 
-  menu = DEFAULT_MENU.map(x => ({...x})); 
-  DB.set(DB.MENU, menu); 
-}
-
+let menu = [];
 let cart = [];
 let activeCat = 'Ramen & Noodles';
 let orderType = 'Dine In';
@@ -148,6 +143,36 @@ let currentAddonsList = [];
 let activeKioskItem = null;  
 
 const peso = n => '₱' + Number(n).toLocaleString('en-PH', {minimumFractionDigits: 0, maximumFractionDigits: 2});
+
+/* ---------- Cloud Synchronization Master Fetch Loader ---------- */
+async function loadMasterMenuCatalog() {
+  if (supabaseClient) {
+    const { data, error } = await supabaseClient
+      .from('menu')
+      .select('*')
+      .order('sort_order', { ascending: true });
+
+    if (!error && data && data.length > 0) {
+      menu = data;
+      console.log("Master catalog pulled successfully from Supabase.");
+    } else {
+      console.warn("Supabase table empty or offline. Falling back to local cache.");
+      menu = DB.get(DB.MENU, null);
+      if (!menu) {
+        menu = DEFAULT_MENU.map(x => ({...x}));
+        DB.set(DB.MENU, menu);
+      }
+    }
+  } else {
+    menu = DB.get(DB.MENU, null);
+    if (!menu) {
+      menu = DEFAULT_MENU.map(x => ({...x}));
+      DB.set(DB.MENU, menu);
+    }
+  }
+  renderMenu();
+  renderManager();
+}
 
 /* ---------- Cashier Name (Editable + Persistent) ---------- */
 function getCashier() {
@@ -237,43 +262,66 @@ function addToCart(id) {
   const m = menu.find(x => x.id === id); 
   if (!m) return;
   
-  // Intercept normal checkout stream if customization options exist
-  if (m.addons && m.addons.length > 0) {
+  if ((m.addons && m.addons.length > 0) || m.cat === 'Ramen & Noodles') {
     launchKioskCustomizer(m);
     return;
   }
   
-  executeCartInsertion(m, []);
+  executeCartInsertion(m, [], '');
 }
 
 function launchKioskCustomizer(item) {
   activeKioskItem = item;
   document.getElementById('kioskItemTitle').textContent = `Customize ${item.name}`;
   
+  const notesInput = document.getElementById('kioskItemNotesInput');
+  if (notesInput) notesInput.value = '';
+
+  const imgFrame = document.getElementById('kioskItemImageFrame');
+  if (imgFrame) {
+    if (item.img) {
+      imgFrame.style.background = 'none';
+      imgFrame.innerHTML = `<img src="${item.img}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;">`;
+    } else {
+      imgFrame.innerHTML = '';
+      imgFrame.style.background = CAT_GRAD[item.cat] || '#333';
+    }
+  }
+
   const grid = document.getElementById('kioskAddonsGrid');
   if (grid) {
-    grid.innerHTML = item.addons.map((add, idx) => `
-      <div class="kiosk-addon-row" onclick="const chk = document.getElementById('kchk_${idx}'); chk.checked = !chk.checked; event.stopPropagation();">
-        <div class="kiosk-addon-info">
-          <span class="kiosk-addon-name">${add.name}</span>
-          <span class="kiosk-addon-price">+ ${peso(add.price)}</span>
+    if (item.addons && item.addons.length > 0) {
+      grid.innerHTML = item.addons.map((add, idx) => `
+        <div class="kiosk-addon-row" onclick="const chk = document.getElementById('kchk_${idx}'); chk.checked = !chk.checked; updateKioskTotalPrice(); event.stopPropagation();">
+          <div class="kiosk-addon-info">
+            <span class="kiosk-addon-name">${add.name}</span>
+            <span class="kiosk-addon-price">+ ${peso(add.price)}</span>
+          </div>
+          <input type="checkbox" id="kchk_${idx}" value="${idx}" onchange="updateKioskTotalPrice(); event.stopPropagation();">
         </div>
-        <input type="checkbox" id="kchk_${idx}" value="${idx}" onclick="event.stopPropagation();">
-      </div>
-    `).join('');
+      `).join('');
+    } else {
+      grid.innerHTML = `<div style="color:var(--ink-muted); font-size:13px; text-align:center; padding:15px; width:100%;">No modifications mapped to this line dish item.</div>`;
+    }
   }
+  
+  updateKioskTotalPrice();
   
   const submitBtn = document.getElementById('kioskSubmitBtn');
   if (submitBtn) {
     submitBtn.onclick = () => {
       const selected = [];
-      item.addons.forEach((add, idx) => {
-        const chk = document.getElementById(`kchk_${idx}`);
-        if (chk && chk.checked) {
-          selected.push({...add});
-        }
-      });
-      executeCartInsertion(item, selected);
+      if (item.addons) {
+        item.addons.forEach((add, idx) => {
+          const chk = document.getElementById(`kchk_${idx}`);
+          if (chk && chk.checked) {
+            selected.push({...add});
+          }
+        });
+      }
+      
+      const specialInstructionsText = notesInput ? notesInput.value.trim() : '';
+      executeCartInsertion(item, selected, specialInstructionsText);
       closeOverlay('kioskOverlay');
     };
   }
@@ -281,10 +329,28 @@ function launchKioskCustomizer(item) {
   document.getElementById('kioskOverlay').classList.add('show');
 }
 
-function executeCartInsertion(item, selectedAddons) {
-  // Composite signature string prevents non-identical modifier lines from grouping together
+function updateKioskTotalPrice() {
+  if (!activeKioskItem) return;
+  
+  let dynamicSumTotal = activeKioskItem.price;
+  if (activeKioskItem.addons) {
+    activeKioskItem.addons.forEach((add, idx) => {
+      const chk = document.getElementById(`kchk_${idx}`);
+      if (chk && chk.checked) {
+        dynamicSumTotal += add.price;
+      }
+    });
+  }
+  
+  const submitBtn = document.getElementById('kioskSubmitBtn');
+  if (submitBtn) {
+    submitBtn.textContent = `Confirm & Add to Order — ${peso(dynamicSumTotal)}`;
+  }
+}
+
+function executeCartInsertion(item, selectedAddons, specialNotes) {
   const addonsSignature = selectedAddons.map(a => a.name).sort().join('|');
-  const uniqueCartLineId = item.id + (addonsSignature ? '-' + addonsSignature : '');
+  const uniqueCartLineId = item.id + (addonsSignature ? '-' + addonsSignature : '') + (specialNotes ? '-' + btoa(specialNotes).slice(0, 8) : '');
   
   const line = cart.find(l => l.cartLineId === uniqueCartLineId);
   if (line) {
@@ -297,7 +363,8 @@ function executeCartInsertion(item, selectedAddons) {
       price: item.price,
       qty: 1,
       note: item.note,
-      selectedAddons: selectedAddons
+      selectedAddons: selectedAddons,
+      customerNotes: specialNotes
     });
   }
   renderCart(); 
@@ -373,12 +440,17 @@ function renderCart() {
         ? `<span class="cart-addon-inline">Extras: ${l.selectedAddons.map(a => `+${a.name}`).join(', ')}</span>`
         : '';
         
+      const notesLabel = l.customerNotes 
+        ? `<span class="cart-addon-inline" style="color: var(--red); font-style: italic;">📝 Note: "${l.customerNotes}"</span>`
+        : '';
+        
       return `
       <div class="line">
         <div class="info">
           <div class="ln">${l.name}</div>
           <div class="lp">${peso(totalLinePrice)} each</div>
           ${addonsLabel}
+          ${notesLabel}
         </div>
         <div class="qty">
           <button onclick="changeQty('${l.cartLineId}',-1)">−</button>
@@ -518,13 +590,16 @@ function confirmPayment() {
   
   const no = currentOrderNo();
   
-  // Format items nicely to append modifiers directly on your receipt records logs
   const orderItemsMapped = cart.map(l => {
     const addonsCost = l.selectedAddons ? l.selectedAddons.reduce((sum, a) => sum + a.price, 0) : 0;
     const linePrice = l.price + addonsCost;
-    const modifiersText = l.selectedAddons && l.selectedAddons.length > 0 
+    let modifiersText = l.selectedAddons && l.selectedAddons.length > 0 
       ? ` (${l.selectedAddons.map(a => a.name).join(', ')})` 
       : '';
+      
+    if (l.customerNotes) {
+      modifiersText += ` [Note: ${l.customerNotes}]`;
+    }
       
     return {
       name: l.name + modifiersText,
@@ -735,25 +810,34 @@ function renderManager() {
   }).join('');
 }
 
-function moveItemInMenu(currentIndex, direction) {
+async function moveItemInMenu(currentIndex, direction) {
   const targetIndex = currentIndex + direction;
-  
-  // Guardrail boundary check
   if (targetIndex < 0 || targetIndex >= menu.length) return;
   
-  // Perform array swap mechanics
+  // Swap mechanics in regional memory
   const tempItem = menu[currentIndex];
   menu[currentIndex] = menu[targetIndex];
   menu[targetIndex] = tempItem;
   
-  // Save updated index sequence to localStorage
+  // Re-assign order priority tracking sequences down the collection array
+  menu.forEach((item, index) => {
+    item.sort_order = index + 1;
+  });
+
+  // Bulk update positions live onto the cloud node if online
+  if (supabaseClient) {
+    for (let item of [menu[currentIndex], menu[targetIndex]]) {
+      await supabaseClient
+        .from('menu')
+        .update({ sort_order: item.sort_order })
+        .eq('id', item.id);
+    }
+  }
+
   DB.set(DB.MENU, menu);
-  
-  // Live update interface renders across modules
   renderMenu();
   renderManager();
-  
-  toast("Menu arrangement updated");
+  toast("Menu arrangement updated across instances");
 }
 
 function openItemEdit(id) {
@@ -845,36 +929,37 @@ function onImgPick(e) {
   const file = e.target.files[0]; 
   if (!file) return;
 
-  // Guard 1: Explicit MIME type check to block broken data assets or non-image uploads
+  const fileName = file.name.toLowerCase();
+  const hasValidExtension = fileName.endsWith('.jpg') || 
+                            fileName.endsWith('.jpeg') || 
+                            fileName.endsWith('.png') || 
+                            fileName.endsWith('.webp');
+
   const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-  if (!allowedTypes.includes(file.type)) {
-    toast('⚠️ Invalid file type. Please select a JPG, PNG, or WEBP image.');
-    e.target.value = ''; // Reset file input element
+  if (!allowedTypes.includes(file.type) && !hasValidExtension) {
+    alert('⚠️ Invalid file type. Please select a clear JPG, PNG, or WEBP image.');
+    e.target.value = ''; 
     return;
   }
 
-  // Guard 2: File size threshold check (10MB limit) to protect browser thread processing
-  const maxSizeBytes = 10 * 1024 * 1024; // 10 Megabytes
+  const maxSizeBytes = 10 * 1024 * 1024; 
   if (file.size > maxSizeBytes) {
-    toast('⚠️ File too large. Please upload an image under 10MB.');
-    e.target.value = ''; // Reset file input element
+    alert('⚠️ File size is too large. Please upload an image under 10MB.');
+    e.target.value = ''; 
     return;
   }
 
   const r = new FileReader();
   r.onload = ev => {
     const img = new Image();
-    
-    // Guard 3: Error catch if image rendering completely fails or payload is corrupted
     img.onerror = () => {
-      toast('⚠️ Failed to load image. File may be broken or corrupted.');
+      alert('⚠️ Failed to load image. File may be broken or corrupted.');
       e.target.value = '';
     };
 
     img.onload = () => {
       const max = 600;
       const sc = Math.min(1, max / Math.max(img.width, img.height));
-      
       const c = document.createElement('canvas');
       c.width = img.width * sc; 
       c.height = img.height * sc;
@@ -882,28 +967,25 @@ function onImgPick(e) {
       const ctx = c.getContext('2d');
       ctx.drawImage(img, 0, 0, c.width, c.height);
       
-      // Safety Upgrade: Convert compressed canvas data into a lightweight binary Blob instead of a giant Base64 text string
       c.toBlob((blob) => {
         if (!blob) {
-          toast('⚠️ Image compression loop processing error.');
+          alert('⚠️ Image compression loop processing error.');
           return;
         }
-
-        // Wrap the blob into a standardized File structure template for Supabase
         pendingImageFile = new File([blob], file.name, { type: 'image/jpeg' });
-
-        // Generate an instant, temporary browser preview tracking string URL
         pendingImg = URL.createObjectURL(pendingImageFile);
         updatePrev(document.getElementById('fCat').value);
       }, 'image/jpeg', 0.82);
     };
-
     img.src = ev.target.result;
   };
-  r.readAsDataURL(f);
+  r.readAsDataURL(file);
 }
 
 function removeImg() {
+  if (pendingImg && pendingImg.startsWith('blob:')) {
+    URL.revokeObjectURL(pendingImg);
+  }
   pendingImageFile = null;
   pendingImg = null; 
   updatePrev(document.getElementById('fCat').value); 
@@ -915,81 +997,101 @@ async function saveItem() {
   const cat = document.getElementById('fCat').value;
   const note = document.getElementById('fNote').value.trim();
   
-  if (!name) { toast('Enter an item name'); return; }
-  if (isNaN(price) || price < 0) { toast('Enter a valid price'); return; }
+  if (!name) { alert('⚠️ Enter an item name'); return; }
+  if (isNaN(price) || price < 0) { alert('⚠️ Enter a valid price'); return; }
 
-  // Set the default or existing image string link fallback position
   let finalImageUrl = pendingImg; 
 
-  // 1. If a fresh photo has been chosen, stream it up to the Supabase Storage Bucket first
   if (pendingImageFile && supabaseClient) {
     toast("Uploading photo to cloud...");
-    
-    // Create a unique file name using timestamps to avoid overwriting duplicates
     const uniqueFileName = `item-${Date.now()}.jpg`;
-    
-    // Upload the raw binary file directly into our public cloud bucket path
     const { data, error } = await supabaseClient.storage
       .from('menu-images')
       .upload(uniqueFileName, pendingImageFile);
 
     if (error) {
       console.error("Supabase Storage Upload Exception:", error);
-      toast("Image upload failed. Saving item text only.");
+      alert("🛑 Cloud Storage Error: " + error.message + "\n\nEnsure your Storage Bucket policy has INSERT rights allowed for public/anon roles!");
+      return; 
     } else {
-      // Extract the clean public asset link url directly from the cloud folder
       const { data: publicUrlData } = supabaseClient.storage
         .from('menu-images')
         .getPublicUrl(uniqueFileName);
-        
-      // Save this lightweight link into our final database entry destination
       finalImageUrl = publicUrlData.publicUrl;
     }
   }
 
-  // 2. Save or update the item inside your application data arrays
-  if (editingId) {
-    const m = menu.find(x => x.id === editingId);
-    Object.assign(m, { name, price, cat, note, img: finalImageUrl, addons: currentAddonsList });
-  } else {
-    menu.push({ id: 'x' + Date.now(), name, price, cat, note, img: finalImageUrl, addons: currentAddonsList });
+  const generatedPayload = { 
+    name, 
+    price, 
+    cat, 
+    note, 
+    img: finalImageUrl, 
+    addons: currentAddonsList,
+    sort_order: editingId ? menu.find(x => x.id === editingId).sort_order : menu.length + 1
+  };
+
+  if (supabaseClient) {
+    if (editingId) {
+      const { error: dbErr } = await supabaseClient.from('menu').update(generatedPayload).eq('id', editingId);
+      if (dbErr) {
+        alert("🛑 Database Sync Error: " + dbErr.message);
+        return;
+      }
+    } else {
+      generatedPayload.id = 'x' + Date.now();
+      const { error: dbErr } = await supabaseClient.from('menu').insert([generatedPayload]);
+      if (dbErr) {
+        alert("🛑 Database Sync Error: " + dbErr.message);
+        return;
+      }
+    }
   }
 
-  // 3. Sync to your local persistent backup data cache layer
-  DB.set(DB.MENU, menu);
+  await loadMasterMenuCatalog();
   
-  // Clear the active file cache out of your browser memory
   pendingImageFile = null;
   pendingImg = null;
-  
   closeOverlay('itemOverlay'); 
-  renderManager(); 
-  renderMenu(); 
-  toast('Product profile saved and synced to cloud ✓');
+  toast('Product profiles synced live across networks ✓');
 }
 
-function deleteItem() {
+async function deleteItem() {
   if (!editingId) return;
   if (!confirm('Delete this item?')) return;
   
-  menu = menu.filter(x => x.id !== editingId); 
-  DB.set(DB.MENU, menu);
+  if (supabaseClient) {
+    const { error } = await supabaseClient.from('menu').delete().eq('id', editingId);
+    if (error) {
+      alert("🛑 Delete Error: " + error.message);
+      return;
+    }
+  }
+  
   cart = cart.filter(l => l.id !== editingId);
+  await loadMasterMenuCatalog();
   
   closeOverlay('itemOverlay'); 
-  renderManager(); 
-  renderMenu(); 
-  renderCart(); 
-  toast('Item deleted');
+  toast('Item deleted from catalog data layers');
 }
 
 function resetMenu() {
   if (!confirm('Reset menu to the original SABASU list? Custom items & photos will be removed.')) return;
-  menu = DEFAULT_MENU.map(x => ({...x})); 
-  DB.set(DB.MENU, menu); 
-  renderManager(); 
-  renderMenu(); 
-  toast('Menu reset');
+  
+  if (supabaseClient) {
+    supabaseClient.from('menu').delete().neq('id', 'keep-all-purge').then(() => {
+      const arrayToInsert = DEFAULT_MENU.map(x => ({...x}));
+      supabaseClient.from('menu').insert(arrayToInsert).then(() => {
+        loadMasterMenuCatalog();
+      });
+    });
+  } else {
+    menu = DEFAULT_MENU.map(x => ({...x})); 
+    DB.set(DB.MENU, menu); 
+    renderManager(); 
+    renderMenu();
+  }
+  toast('Menu configuration baseline loaded');
 }
 
 /* ---------- Overlay & Alert Notification Utilities ---------- */
@@ -997,7 +1099,6 @@ function closeOverlay(id) { document.getElementById(id).classList.remove('show')
 let toastT;
 function toast(msg) {
   const t = document.getElementById('toast'); 
-  // Update inner text safely without altering structure
   t.innerHTML = '🔔 ' + msg;
   t.classList.add('show');
   clearTimeout(toastT); 
@@ -1011,7 +1112,7 @@ if (fCatEl) fCatEl.addEventListener('change', e => { if (!pendingImg) updatePrev
 /* ---------- System Initialization ---------- */
 initCashier();
 renderCats(); 
-renderMenu(); 
 renderCart(); 
 onDiscChange();
-initAuth(); // Launches auth session verification triggers
+initAuth(); 
+loadMasterMenuCatalog(); // Triggers real-time cloud data retrieval routine on app boot
