@@ -1005,17 +1005,20 @@ async function saveItem() {
   if (pendingImageFile && supabaseClient) {
     toast("Uploading photo to cloud...");
     const uniqueFileName = `item-${Date.now()}.jpg`;
+    
+    // Using lowercase 'menu-images' to line up with the true database ID signature
     const { data, error } = await supabaseClient.storage
-      .from('menu-images')
+      .from('menu-images') 
       .upload(uniqueFileName, pendingImageFile);
 
     if (error) {
       console.error("Supabase Storage Upload Exception:", error);
-      alert("🛑 Cloud Storage Error: " + error.message + "\n\nEnsure your Storage Bucket policy has INSERT rights allowed for public/anon roles!");
+      alert("🛑 Cloud Storage Error: " + error.message + "\n\nIf this occurs, make sure your SQL Editor query compiled successfully.");
       return; 
     } else {
+      // Match lowercase here as well
       const { data: publicUrlData } = supabaseClient.storage
-        .from('menu-images')
+        .from('menu-images') 
         .getPublicUrl(uniqueFileName);
       finalImageUrl = publicUrlData.publicUrl;
     }
