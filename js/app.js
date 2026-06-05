@@ -140,7 +140,8 @@ let activeCat = 'Ramen & Noodles';
 let orderType = 'Dine In';
 let payMethod = 'Cash';
 let editingId = null;
-let pendingImg = null;
+let pendingImg = null;  
+let pendingImageFile = null;
 
 // Kiosk intermediate item configuration caches
 let currentAddonsList = []; 
@@ -841,31 +842,74 @@ function updatePrev(cat) {
 }
 
 function onImgPick(e) {
-  const f = e.target.files[0]; 
-  if (!f) return;
+  const file = e.target.files[0]; 
+  if (!file) return;
+
+  // Guard 1: Explicit MIME type check to block broken data assets or non-image uploads
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+  if (!allowedTypes.includes(file.type)) {
+    toast('⚠️ Invalid file type. Please select a JPG, PNG, or WEBP image.');
+    e.target.value = ''; // Reset file input element
+    return;
+  }
+
+  // Guard 2: File size threshold check (10MB limit) to protect browser thread processing
+  const maxSizeBytes = 10 * 1024 * 1024; // 10 Megabytes
+  if (file.size > maxSizeBytes) {
+    toast('⚠️ File too large. Please upload an image under 10MB.');
+    e.target.value = ''; // Reset file input element
+    return;
+  }
+
   const r = new FileReader();
   r.onload = ev => {
     const img = new Image();
+    
+    // Guard 3: Error catch if image rendering completely fails or payload is corrupted
+    img.onerror = () => {
+      toast('⚠️ Failed to load image. File may be broken or corrupted.');
+      e.target.value = '';
+    };
+
     img.onload = () => {
-      const max = 600, sc = Math.min(1, max / Math.max(img.width, img.height));
+      const max = 600;
+      const sc = Math.min(1, max / Math.max(img.width, img.height));
+      
       const c = document.createElement('canvas');
       c.width = img.width * sc; 
       c.height = img.height * sc;
-      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-      pendingImg = c.toDataURL('image/jpeg', 0.82);
-      updatePrev(document.getElementById('fCat').value);
+      
+      const ctx = c.getContext('2d');
+      ctx.drawImage(img, 0, 0, c.width, c.height);
+      
+      // Safety Upgrade: Convert compressed canvas data into a lightweight binary Blob instead of a giant Base64 text string
+      c.toBlob((blob) => {
+        if (!blob) {
+          toast('⚠️ Image compression loop processing error.');
+          return;
+        }
+
+        // Wrap the blob into a standardized File structure template for Supabase
+        pendingImageFile = new File([blob], file.name, { type: 'image/jpeg' });
+
+        // Generate an instant, temporary browser preview tracking string URL
+        pendingImg = URL.createObjectURL(pendingImageFile);
+        updatePrev(document.getElementById('fCat').value);
+      }, 'image/jpeg', 0.82);
     };
+
     img.src = ev.target.result;
   };
   r.readAsDataURL(f);
 }
 
-function removeImg() { 
+function removeImg() {
+  pendingImageFile = null;
   pendingImg = null; 
   updatePrev(document.getElementById('fCat').value); 
 }
 
-function saveItem() {
+async function saveItem() {
   const name = document.getElementById('fName').value.trim();
   const price = parseFloat(document.getElementById('fPrice').value);
   const cat = document.getElementById('fCat').value;
@@ -873,18 +917,55 @@ function saveItem() {
   
   if (!name) { toast('Enter an item name'); return; }
   if (isNaN(price) || price < 0) { toast('Enter a valid price'); return; }
-  
+
+  // Set the default or existing image string link fallback position
+  let finalImageUrl = pendingImg; 
+
+  // 1. If a fresh photo has been chosen, stream it up to the Supabase Storage Bucket first
+  if (pendingImageFile && supabaseClient) {
+    toast("Uploading photo to cloud...");
+    
+    // Create a unique file name using timestamps to avoid overwriting duplicates
+    const uniqueFileName = `item-${Date.now()}.jpg`;
+    
+    // Upload the raw binary file directly into our public cloud bucket path
+    const { data, error } = await supabaseClient.storage
+      .from('menu-images')
+      .upload(uniqueFileName, pendingImageFile);
+
+    if (error) {
+      console.error("Supabase Storage Upload Exception:", error);
+      toast("Image upload failed. Saving item text only.");
+    } else {
+      // Extract the clean public asset link url directly from the cloud folder
+      const { data: publicUrlData } = supabaseClient.storage
+        .from('menu-images')
+        .getPublicUrl(uniqueFileName);
+        
+      // Save this lightweight link into our final database entry destination
+      finalImageUrl = publicUrlData.publicUrl;
+    }
+  }
+
+  // 2. Save or update the item inside your application data arrays
   if (editingId) {
     const m = menu.find(x => x.id === editingId);
-    Object.assign(m, {name, price, cat, note, img: pendingImg || null, addons: currentAddonsList});
+    Object.assign(m, { name, price, cat, note, img: finalImageUrl, addons: currentAddonsList });
   } else {
-    menu.push({id: 'x' + Date.now(), name, price, cat, note, img: pendingImg || null, addons: currentAddonsList});
+    menu.push({ id: 'x' + Date.now(), name, price, cat, note, img: finalImageUrl, addons: currentAddonsList });
   }
+
+  // 3. Sync to your local persistent backup data cache layer
   DB.set(DB.MENU, menu);
+  
+  // Clear the active file cache out of your browser memory
+  pendingImageFile = null;
+  pendingImg = null;
+  
   closeOverlay('itemOverlay'); 
   renderManager(); 
   renderMenu(); 
-  toast('Item saved ✓');
+  toast('Product profile saved and synced to cloud ✓');
 }
 
 function deleteItem() {
