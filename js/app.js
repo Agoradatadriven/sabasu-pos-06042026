@@ -22,31 +22,6 @@ async function initAuth() {
   supabaseClient.auth.onAuthStateChange((_event, session) => {
     toggleAuthUI(session);
   });
-
-  // Inside your array mapping or forEach loop that creates the manager items:
-const isFirst = index === 0;
-const isLast = index === menuArray.length - 1;
-
-return `
-  <div class="mcard" data-id="${item.id}">
-    <div class="mthumb" style="background-color: ${item.color || 'var(--bg-main)'}">
-      ${item.image ? `<img src="${item.image}">` : item.name.charAt(0)}
-    </div>
-    <div class="mi">
-      <div class="mn">${item.name}</div>
-      <div class="mc">${item.category}</div>
-      <div class="mp">₱${item.price}</div>
-    </div>
-    
-    <!-- Action Controls Cluster -->
-    <div class="mcard-actions">
-      <button class="btn-sort" onclick="moveItemInMenu(${index}, -1)" ${isFirst ? 'disabled' : ''} title="Move Left">▲</button>
-      <button class="btn-sort" onclick="moveItemInMenu(${index}, 1)" ${isLast ? 'disabled' : ''} title="Move Right">▼</button>
-      <button class="medit" onclick="editItem('${item.id}')">✏️</button>
-    </div>
-  </div>
-`;
-
 }
 
 function toggleAuthUI(session) {
@@ -149,14 +124,12 @@ let menu = DB.get(DB.MENU, null);
 if(!menu){ menu = DEFAULT_MENU.map(x=>({...x})); DB.set(DB.MENU, menu); }
 
 let cart = [];
-// Automatically boot system straight into your first real menu category
 let activeCat = 'Ramen & Noodles';
 let orderType = 'Dine In';
 let payMethod = 'Cash';
 let editingId = null;
 let pendingImg = null;
 
-// Global workspace variables tracking interactive item configurations
 let currentCustomizeItem = null;
 let customQty = 1;
 
@@ -208,7 +181,7 @@ tick();
 function currentOrderNo(){ return DB.get(DB.COUNTER,0)+1; }
 function fmtNo(n){ return '#'+String(n).padStart(3,'0'); }
 
-/* ---------- Render Left Sidebar Categories Panel (No Emojis / No All Button) ---------- */
+/* ---------- Render Left Sidebar Categories Panel ---------- */
 function renderCats(){
   const cats = Object.keys(CAT_EMOJI);
   const catsBox = document.getElementById('cats');
@@ -456,7 +429,7 @@ function confirmPayment(){
   closeCart();
 }
 
-/* ---------- Receipt (shows cashier name) ---------- */
+/* ---------- Receipt ---------- */
 function showReceipt(o, isNew){
   const dt=new Date(o.ts);
   const itemsHtml=o.items.map(i=>`
@@ -555,16 +528,56 @@ function exportCSV(){
 
 /* ---------- Menu Manager ---------- */
 function renderManager(){
-  document.getElementById('mgrGrid').innerHTML=menu.map(m=>{
-    const thumb=m.img?`<img src="${m.img}">` : `<span></span>`;
-    const bg=m.img?'':`style="background:${CAT_GRAD[m.cat]}"`;
-    return `<div class="mcard">
-      <div class="mthumb" ${bg}>${thumb}</div>
-      <div class="mi"><div class="mn">${m.name}</div><div class="mc">${m.cat}${m.note?' · '+m.note:''}</div><div class="mp">${peso(m.price)}</div></div>
-      <button class="medit" onclick="openItemEdit('${m.id}')">✎</button>
-    </div>`;
+  const mgrGrid = document.getElementById('mgrGrid');
+  if(!mgrGrid) return;
+
+  mgrGrid.innerHTML = menu.map((m, index) => {
+    const thumb = m.img ? `<img src="${m.img}">` : `<span></span>`;
+    const bg = m.img ? '' : `style="background:${CAT_GRAD[m.cat] || '#333'}"`;
+    const isFirst = index === 0;
+    const isLast = index === menu.length - 1;
+
+    return `
+      <div class="mcard" data-id="${m.id}">
+        <div class="mthumb" ${bg}>${thumb}</div>
+        <div class="mi">
+          <div class="mn">${m.name}</div>
+          <div class="mc">${m.cat}${m.note ? ' · ' + m.note : ''}</div>
+          <div class="mp">${peso(m.price)}</div>
+        </div>
+        
+        <!-- Action Controls Cluster -->
+        <div class="mcard-actions">
+          <button class="btn-sort" onclick="moveItemInMenu(${index}, -1)" ${isFirst ? 'disabled' : ''} title="Move Up">▲</button>
+          <button class="btn-sort" onclick="moveItemInMenu(${index}, 1)" ${isLast ? 'disabled' : ''} title="Move Down">▼</button>
+          <button class="medit" onclick="openItemEdit('${m.id}')">✏️</button>
+        </div>
+      </div>
+    `;
   }).join('');
 }
+
+function moveItemInMenu(currentIndex, direction) {
+    const targetIndex = currentIndex + direction;
+    
+    // Guardrail boundary check
+    if (targetIndex < 0 || targetIndex >= menu.length) return;
+    
+    // Perform array swap mechanics
+    const tempItem = menu[currentIndex];
+    menu[currentIndex] = menu[targetIndex];
+    menu[targetIndex] = tempItem;
+    
+    // Save updated index sequence to localStorage
+    DB.set(DB.MENU, menu);
+    
+    // Live update interface renders across modules
+    renderMenu();
+    renderManager();
+    
+    toast("Menu arrangement updated");
+}
+
 function openItemEdit(id){
   editingId=id; pendingImg=null;
   const m = id?menu.find(x=>x.id===id):null;
@@ -640,30 +653,6 @@ function toast(msg){
 document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{ if(e.target===o) o.classList.remove('show'); }));
 const fCatEl = document.getElementById('fCat');
 if (fCatEl) fCatEl.addEventListener('change',e=>{ if(!pendingImg) updatePrev(e.target.value); });
-
-function moveItemInMenu(currentIndex, direction) {
-    // 1. Identify target index offset
-    const targetIndex = currentIndex + direction;
-    
-    // Guardrail: Ensure swap operations stay bounded inside the array limits
-    if (targetIndex < 0 || targetIndex >= globalMenuItemsArray.length) return;
-    
-    // 2. Perform clean in-place array element swap
-    const tempItem = globalMenuItemsArray[currentIndex];
-    globalMenuItemsArray[currentIndex] = globalMenuItemsArray[targetIndex];
-    globalMenuItemsArray[targetIndex] = tempItem;
-    
-    // 3. Save the new structural sorting order sequence
-    // (If using LocalStorage, save it here; if using Supabase, update your DB rows)
-    localStorage.setItem('sabasu_menu', JSON.stringify(globalMenuItemsArray));
-    
-    // 4. Refresh both views instantly so the layout updates across screens
-    renderPOSGrid();       // Updates the ordering grid layout
-    renderManagerGrid();   // Updates the management view layout
-    
-    // Optional: Throw a lightweight scannable notification
-    showToast("Menu arrangement updated");
-}
 
 /* ---------- Init ---------- */
 initCashier();
