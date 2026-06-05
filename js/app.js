@@ -22,6 +22,31 @@ async function initAuth() {
   supabaseClient.auth.onAuthStateChange((_event, session) => {
     toggleAuthUI(session);
   });
+
+  // Inside your array mapping or forEach loop that creates the manager items:
+const isFirst = index === 0;
+const isLast = index === menuArray.length - 1;
+
+return `
+  <div class="mcard" data-id="${item.id}">
+    <div class="mthumb" style="background-color: ${item.color || 'var(--bg-main)'}">
+      ${item.image ? `<img src="${item.image}">` : item.name.charAt(0)}
+    </div>
+    <div class="mi">
+      <div class="mn">${item.name}</div>
+      <div class="mc">${item.category}</div>
+      <div class="mp">₱${item.price}</div>
+    </div>
+    
+    <!-- Action Controls Cluster -->
+    <div class="mcard-actions">
+      <button class="btn-sort" onclick="moveItemInMenu(${index}, -1)" ${isFirst ? 'disabled' : ''} title="Move Left">▲</button>
+      <button class="btn-sort" onclick="moveItemInMenu(${index}, 1)" ${isLast ? 'disabled' : ''} title="Move Right">▼</button>
+      <button class="medit" onclick="editItem('${item.id}')">✏️</button>
+    </div>
+  </div>
+`;
+
 }
 
 function toggleAuthUI(session) {
@@ -615,6 +640,30 @@ function toast(msg){
 document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{ if(e.target===o) o.classList.remove('show'); }));
 const fCatEl = document.getElementById('fCat');
 if (fCatEl) fCatEl.addEventListener('change',e=>{ if(!pendingImg) updatePrev(e.target.value); });
+
+function moveItemInMenu(currentIndex, direction) {
+    // 1. Identify target index offset
+    const targetIndex = currentIndex + direction;
+    
+    // Guardrail: Ensure swap operations stay bounded inside the array limits
+    if (targetIndex < 0 || targetIndex >= globalMenuItemsArray.length) return;
+    
+    // 2. Perform clean in-place array element swap
+    const tempItem = globalMenuItemsArray[currentIndex];
+    globalMenuItemsArray[currentIndex] = globalMenuItemsArray[targetIndex];
+    globalMenuItemsArray[targetIndex] = tempItem;
+    
+    // 3. Save the new structural sorting order sequence
+    // (If using LocalStorage, save it here; if using Supabase, update your DB rows)
+    localStorage.setItem('sabasu_menu', JSON.stringify(globalMenuItemsArray));
+    
+    // 4. Refresh both views instantly so the layout updates across screens
+    renderPOSGrid();       // Updates the ordering grid layout
+    renderManagerGrid();   // Updates the management view layout
+    
+    // Optional: Throw a lightweight scannable notification
+    showToast("Menu arrangement updated");
+}
 
 /* ---------- Init ---------- */
 initCashier();
